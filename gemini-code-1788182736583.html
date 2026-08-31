@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Informasi Mold | PT Cahaya Buana Intitama</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        .header p {
+            margin: 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-size: 1.2em;
+            color: var(--primary);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .info-value {
+            text-align: right;
+        }
+        .trouble-list {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin: 0;
+            color: #d9534f;
+        }
+        .error-msg {
+            text-align: center;
+            color: #d9534f;
+            font-weight: bold;
+            padding: 20px;
+            background: #fdf2f2;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Data Informasi Mold</h1>
+        <p>Divisi Maintenance Mold - PT Cahaya Buana Intitama</p>
+    </div>
+
+    <div id="content-area">
+        <p style="text-align: center;">Memuat data...</p>
+    </div>
+</div>
+
+<script>
+    // 1. DATABASE SIMULASI (Format JSON)
+    // Anda bisa menambahkan data mold baru di dalam kurung kurawal ini
+    const moldDatabase = {
+        "MOLD-001": {
+            nama: "Mold Injeksi Plastik - Cover Depan",
+            pembuatan: "12 Januari 2023",
+            terakhirMaintenance: "15 Agustus 2026",
+            posisi: "Rak A2, Section Persiapan",
+            troubleSering: [
+                "Ejector pin macet / patah",
+                "Kebocoran jalur cooling water"
+            ],
+            status: "Siap Produksi"
+        },
+        "MOLD-002": {
+            nama: "Mold Base Part B",
+            pembuatan: "05 Maret 2024",
+            terakhirMaintenance: "20 Agustus 2026",
+            posisi: "Area Trouble & Repair",
+            troubleSering: [
+                "Goresan pada cavity",
+                "Flash pada parting line"
+            ],
+            status: "Sedang di-Repair"
+        }
+    };
+
+    // 2. FUNGSI UNTUK MENGAMBIL PARAMETER URL
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    // 3. FUNGSI UNTUK MENAMPILKAN DATA
+    function displayData() {
+        const moldId = getQueryParam('id');
+        const contentArea = document.getElementById('content-area');
+
+        if (!moldId) {
+            contentArea.innerHTML = `<div class="error-msg">Silakan scan QR Code yang valid pada Mold.</div>`;
+            return;
+        }
+
+        const data = moldDatabase[moldId];
+
+        if (data) {
+            // Render list trouble
+            let troubleHTML = '<ul class="trouble-list">';
+            data.troubleSering.forEach(t => {
+                troubleHTML += `<li>${t}</li>`;
+            });
+            troubleHTML += '</ul>';
+
+            // Render HTML ke dalam web
+            contentArea.innerHTML = `
+                <div class="card">
+                    <h2>ID: ${moldId}</h2>
+                    <div class="info-row">
+                        <span class="info-label">Nama Mold:</span>
+                        <span class="info-value">${data.nama}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Status Saat Ini:</span>
+                        <span class="info-value" style="font-weight: bold; color: ${data.status === 'Sedang di-Repair' ? '#d9534f' : '#5cb85c'}">${data.status}</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Spesifikasi & Riwayat</h2>
+                    <div class="info-row">
+                        <span class="info-label">Tanggal Pembuatan:</span>
+                        <span class="info-value">${data.pembuatan}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Terakhir Maintenance:</span>
+                        <span class="info-value">${data.terakhirMaintenance}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Posisi Mold:</span>
+                        <span class="info-value">${data.posisi}</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Riwayat Trouble (Sering Terjadi)</h2>
+                    ${troubleHTML}
+                </div>
+            `;
+        } else {
+            contentArea.innerHTML = `<div class="error-msg">Data Mold dengan ID "${moldId}" tidak ditemukan di sistem.</div>`;
+        }
+    }
+
+    // Jalankan fungsi saat web selesai dimuat
+    window.onload = displayData;
+</script>
+
+</body>
+</html>
