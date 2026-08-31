@@ -3,196 +3,611 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Informasi Mold | PT Cahaya Buana Intitama</title>
+    <title>Sistem Informasi & Maintenance Mold | PT Cahaya Buana Intitama</title>
     <style>
         :root {
-            --primary: #0056b3;
-            --bg-color: #f4f7f6;
+            --primary-color: #0000cc;
+            --accent-color: #ff0000;
+            --bg-color: #f0f4f8;
             --card-bg: #ffffff;
-            --text-main: #333333;
+            --text-dark: #2c3e50;
+            --border-color: #e2e8f0;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
         }
-        .container {
-            max-width: 600px;
-            width: 100%;
+
+        header {
+            background-color: #ffffff;
+            color: var(--primary-color);
+            padding: 15px 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-bottom: 4px solid var(--accent-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+        .header-container { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .logo-img { height: 55px; object-fit: contain; flex-shrink: 0; }
+        .header-title h1 { font-size: 1.2rem; margin-bottom: 2px; color: var(--primary-color); }
+        .header-title p { font-size: 0.75rem; color: #555; font-weight: 500; }
+        
+        .menu-btn { font-size: 28px; cursor: pointer; color: var(--primary-color); background: none; border: none; padding: 5px; }
+
+        .sidebar {
+            position: fixed; top: 0; right: -250px; width: 250px; height: 100vh;
+            background-color: #ffffff; box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+            transition: right 0.3s ease; z-index: 1000; padding-top: 20px;
+            border-left: 4px solid var(--primary-color);
         }
-        .header h1 {
-            color: var(--primary);
-            margin-bottom: 5px;
+        .sidebar.active { right: 0; }
+        .close-btn { text-align: right; padding: 0 20px; font-size: 30px; cursor: pointer; color: #888; margin-bottom: 20px; display: block; }
+        .sidebar a {
+            display: block; padding: 15px 20px; color: var(--text-dark);
+            text-decoration: none; font-weight: 600; border-bottom: 1px solid #eee; transition: background 0.2s;
         }
-        .header p {
-            margin: 0;
-            font-size: 0.9em;
-            color: #666;
+        .sidebar a:hover { background-color: #f8fafc; color: var(--primary-color); padding-left: 25px; }
+
+        .container { max-width: 900px; margin: 25px auto; padding: 0 15px; }
+
+        .welcome-box {
+            text-align: center; 
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            padding: 40px 20px; border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05); 
+            border-top: 5px solid var(--primary-color); 
+            margin-top: 10px;
         }
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 20px;
+        .welcome-box h1 { color: var(--primary-color); font-size: 2.2rem; margin-bottom: 5px; }
+        .welcome-subtitle { color: #666; font-size: 1rem; margin-bottom: 25px; }
+
+        .info-banner {
+            background-color: #e3f2fd; color: #0d47a1;
+            padding: 10px 15px; border-radius: 8px; font-size: 0.9rem;
+            max-width: 600px; margin: 0 auto 25px auto;
+            border-left: 4px solid #1976d2; text-align: left;
+            display: flex; gap: 10px; align-items: center;
         }
-        .card h2 {
-            font-size: 1.2em;
-            color: var(--primary);
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            margin-top: 0;
+
+        .dashboard-stats { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 35px; }
+        .stat-card {
+            padding: 20px 15px; border-radius: 12px; width: 140px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04); position: relative;
+            overflow: hidden; transition: transform 0.2s;
         }
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px dashed #eee;
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card h3 { font-size: 2rem; margin: 10px 0 5px 0; position: relative; z-index: 2; }
+        .stat-card p { font-size: 0.85rem; margin: 0; font-weight: bold; position: relative; z-index: 2; }
+        .stat-icon { font-size: 2rem; position: absolute; top: -5px; right: -5px; opacity: 0.2; z-index: 1; }
+
+        .stat-blue { background-color: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; }
+        .stat-green { background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+        .stat-red { background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+        .quick-actions-title { font-size: 1rem; color: #555; margin-bottom: 15px; font-weight: 600; text-align: center; }
+        .quick-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; max-width: 600px; margin: 0 auto; }
+        .btn-action-main, .btn-action-outline {
+            padding: 12px 25px; font-size: 1rem; border-radius: 8px; cursor: pointer; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+            transition: all 0.2s; flex: 1; min-width: 150px; border: none;
         }
-        .info-row:last-child {
-            border-bottom: none;
+        .btn-action-main { background-color: var(--primary-color); color: white; box-shadow: 0 4px 10px rgba(0,0,204,0.2); }
+        .btn-action-main:hover { background-color: #0000a0; transform: translateY(-2px); }
+        .btn-action-outline { background-color: white; color: var(--primary-color); border: 2px solid var(--primary-color); }
+        .btn-action-outline:hover { background-color: #f0f4f8; transform: translateY(-2px); }
+
+        .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-box {
+            background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex; gap: 10px; border-left: 4px solid var(--primary-color); flex: 1; min-width: 250px;
         }
-        .info-label {
-            font-weight: bold;
-            color: #555;
+        .search-box input { width: 100%; border: none; font-size: 1rem; outline: none; }
+        
+        .btn-add {
+            background-color: var(--success-color); color: white; border: none;
+            padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .info-value {
-            text-align: right;
+        .btn-add:hover { background-color: #218838; }
+
+        .mold-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .mold-card {
+            background: var(--card-bg); border-radius: 8px; padding: 15px; border: 1px solid var(--border-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.2s ease;
+            text-align: center; border-top: 3px solid var(--primary-color);
         }
-        .trouble-list {
-            list-style-type: disc;
-            padding-left: 20px;
-            margin: 0;
-            color: #d9534f;
-        }
-        .error-msg {
-            text-align: center;
-            color: #d9534f;
-            font-weight: bold;
-            padding: 20px;
-            background: #fdf2f2;
-            border-radius: 8px;
+        .mold-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: var(--primary-color); }
+        .mold-card h3 { color: var(--primary-color); font-size: 1.1rem; margin-bottom: 5px; }
+        .mold-card .nama-mold { font-size: 0.9rem; color: #444; font-weight: bold; }
+        .mold-card .nama-produk { font-size: 0.8rem; color: #888; margin-top: 3px; }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin-top: 8px; }
+        .status-ready { background-color: #d4edda; color: #155724; }
+        .status-repair { background-color: #f8d7da; color: #721c24; }
+        
+        .empty-state { text-align: center; padding: 40px; color: #888; width: 100%; grid-column: 1 / -1; }
+
+        .btn-back { display: inline-block; background: #6c757d; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 0.9rem; margin-bottom: 20px; cursor: pointer; border: none; }
+        .btn-back:hover { background: #5a6268; }
+        .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; border-top: 3px solid var(--primary-color); }
+        .card h2 { font-size: 1.2rem; color: var(--primary-color); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; }
+        .detail-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .detail-table th, .detail-table td { padding: 10px 12px; border: 1px solid var(--border-color); text-align: left; vertical-align: top; }
+        .detail-table th { background-color: #f8fafc; width: 35%; color: #4a5568; font-weight: 600; }
+        
+        .action-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .btn-action-full { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; color: white; transition: opacity 0.2s ease; }
+        .btn-action-full:hover { opacity: 0.9; }
+        .btn-form { background-color: #673ab7; }
+        .btn-sheet { background-color: #0f9d58; }
+        
+        .hidden { display: none !important; }
+
+        /* MODAL TAMBAH MOLD */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .modal-box { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 12px; }
+        .modal-box h2 { color: var(--primary-color); margin-bottom: 15px; font-size: 1.3rem; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #444; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-cancel { background: #ccc; padding: 10px; border: none; border-radius: 6px; flex: 1; cursor: pointer; font-weight: bold; }
+        .btn-save { background: var(--primary-color); color: white; padding: 10px; border: none; border-radius: 6px; flex: 1; cursor: pointer; font-weight: bold; }
+
+        @media (max-width: 600px) {
+            .header-title h1 { font-size: 1rem; }
+            .header-title p { display: none; }
+            .logo-img { height: 40px; }
+            .quick-actions { flex-direction: column; }
+            .toolbar { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>Data Informasi Mold</h1>
-        <p>Divisi Maintenance Mold - PT Cahaya Buana Intitama</p>
+    <header>
+        <div class="header-container">
+            <div class="header-left">
+                <img src="logo.png" alt="Logo PT Cahaya Buana Intitama" class="logo-img" onerror="this.style.display='none'">
+                <div class="header-title">
+                    <h1>PT CAHAYA BUANA INTITAMA</h1>
+                    <p>Divisi Maintenance Mold &bull; Section Maintenance</p>
+                </div>
+            </div>
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        </div>
+    </header>
+
+    <div id="sidebarMenu" class="sidebar">
+        <span class="close-btn" onclick="toggleSidebar()">&times;</span>
+        <a href="#" onclick="showView('view-welcome')">🏠 Beranda</a>
+        <a href="#" onclick="showView('view-home')">📋 Data Mold</a>
+        <a href="#" onclick="showView('view-maintenance')">🔧 Data Maintenance</a>
     </div>
 
-    <div id="content-area">
-        <p style="text-align: center;">Memuat data...</p>
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:900;" onclick="toggleSidebar()"></div>
+
+    <div id="modalTambah" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2>Tambah Data Asset Mold</h2>
+            <div class="form-group">
+                <label>ID Mold (Contoh: MOLD-001)</label>
+                <input type="text" id="inputID" placeholder="MOLD-...">
+            </div>
+            <div class="form-group">
+                <label>Nama Mold</label>
+                <input type="text" id="inputNama" placeholder="Nama part mold...">
+            </div>
+            <div class="form-group">
+                <label>Nama Produk</label>
+                <input type="text" id="inputProduk" placeholder="Digunakan untuk produk...">
+            </div>
+            <div class="form-group">
+                <label>Posisi / Lokasi Rak</label>
+                <input type="text" id="inputPosisi" placeholder="Contoh: Rak A-1">
+            </div>
+            <div class="form-group">
+                <label>Status Saat Ini</label>
+                <select id="inputStatus">
+                    <option value="Siap Produksi">Siap Produksi</option>
+                    <option value="Sedang di-Repair">Sedang di-Repair</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal()">Batal</button>
+                <button class="btn-save" onclick="simpanMold()">Simpan ke Spreadsheet</button>
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-    // 1. DATABASE SIMULASI (Format JSON)
-    // Anda bisa menambahkan data mold baru di dalam kurung kurawal ini
-    const moldDatabase = {
-        "MOLD-001": {
-            nama: "Mold Injeksi Plastik - Cover Depan",
-            pembuatan: "12 Januari 2023",
-            terakhirMaintenance: "15 Agustus 2026",
-            posisi: "Rak A2, Section Persiapan",
-            troubleSering: [
-                "Ejector pin macet / patah",
-                "Kebocoran jalur cooling water"
-            ],
-            status: "Siap Produksi"
-        },
-        "MOLD-002": {
-            nama: "Mold Base Part B",
-            pembuatan: "05 Maret 2024",
-            terakhirMaintenance: "20 Agustus 2026",
-            posisi: "Area Trouble & Repair",
-            troubleSering: [
-                "Goresan pada cavity",
-                "Flash pada parting line"
-            ],
-            status: "Sedang di-Repair"
+    <div class="container">
+        
+        <div id="view-welcome">
+            <div class="welcome-box">
+                <h1>Selamat Datang!</h1>
+                <p class="welcome-subtitle">Sistem Informasi & Riwayat Maintenance Asset Mold</p>
+                
+                <div class="info-banner">
+                    <span style="font-size: 1.2rem;">📌</span>
+                    <span><strong>Pusat Data Lapangan:</strong> Scan QR Code pada fisik mold untuk melihat status dan input riwayat perbaikan secara real-time.</span>
+                </div>
+                
+                <div class="dashboard-stats" id="dashboardStats">
+                    <div class="stat-card stat-blue">
+                        <div class="stat-icon">📦</div>
+                        <h3 id="statTotal">0</h3>
+                        <p>Total Asset</p>
+                    </div>
+                    <div class="stat-card stat-green">
+                        <div class="stat-icon">✅</div>
+                        <h3 id="statSiap">0</h3>
+                        <p>Siap Produksi</p>
+                    </div>
+                    <div class="stat-card stat-red">
+                        <div class="stat-icon">🔧</div>
+                        <h3 id="statRepair">0</h3>
+                        <p>Sedang Repair</p>
+                    </div>
+                </div>
+
+                <div class="quick-actions-title">Aksi Cepat</div>
+                <div class="quick-actions">
+                    <button class="btn-action-main" onclick="showView('view-home')">
+                        🔍 Cari / Daftar Mold
+                    </button>
+                    <a href="https://forms.google.com" target="_blank" class="btn-action-outline">
+                        📝 Input Form Trouble
+                    </a>
+                    <button class="btn-action-outline" onclick="showView('view-maintenance')">
+                        📊 Rekap Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-home" class="hidden">
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" id="searchInput" onkeyup="filterMold()" placeholder="🔍 Cari ID, Nama Mold, atau Produk...">
+                </div>
+                <button class="btn-add" onclick="openModal()">+ Tambah Asset Mold</button>
+            </div>
+
+            <h2 style="margin-bottom: 15px; color: var(--primary-color); font-size: 1.3rem;">Daftar Asset Mold</h2>
+            <div class="mold-grid" id="moldGrid">
+                <div class="empty-state">Memuat data dari Google Sheets...</div>
+            </div>
+        </div>
+
+        <div id="view-maintenance" class="hidden">
+            <div class="card">
+                <h2>Rekap Data Maintenance</h2>
+                <p style="color: #666; margin-bottom: 20px;">Halaman rekap jadwal dan laporan keseluruhan maintenance dari Spreadsheet.</p>
+                <a id="btnMasterSheet" href="https://docs.google.com/spreadsheets/d/12N7J-DbGInr_h_alEdMwsmmLRSGl7CNqn-oLI_sLHUQ/edit" target="_blank" class="btn-action-full btn-sheet">
+                    📊 Buka Master Data (Spreadsheet)
+                </a>
+            </div>
+        </div>
+
+        <div id="view-detail" class="hidden">
+            <button class="btn-back" onclick="goBack()">← Kembali</button>
+            
+            <div class="card">
+                <h2 id="detailTitle">Identitas Mold</h2>
+                <table class="detail-table">
+                    <tr><th>Nama / No. Mold</th><td id="detailNama">-</td></tr>
+                    <tr><th>Status Mold</th><td id="detailStatus" style="font-weight: bold;">-</td></tr>
+                    <tr><th>Posisi / Rak</th><td id="detailPosisi">-</td></tr>
+                    <tr><th>Produk</th><td id="detailProduk">-</td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Riwayat Trouble & Repair Terakhir</h2>
+                <table class="detail-table">
+                    <tr><th>Tanggal</th><td id="dtTanggal">-</td></tr>
+                    <tr><th>Jam</th><td id="dtJam">-</td></tr>
+                    <tr><th>Mesin</th><td id="dtMesin">-</td></tr>
+                    <tr><th>Jenis Trouble</th><td id="dtJenis">-</td></tr>
+                    <tr><th>Lokasi Trouble</th><td id="dtLokasi">-</td></tr>
+                    <tr><th>Bagian Mold</th><td id="dtBagian">-</td></tr>
+                    <tr><th>Penyebab</th><td id="dtPenyebab">-</td></tr>
+                    <tr><th>Detail Penyebab</th><td id="dtDetailPenyebab">-</td></tr>
+                    <tr><th>Tindakan Repair</th><td id="dtTindakan">-</td></tr>
+                    <tr><th>Finishing</th><td id="dtFinishing">-</td></tr>
+                    <tr><th>Durasi Repair</th><td id="dtDurasi">-</td></tr>
+                    <tr><th>Hasil Trial</th><td id="dtHasil" style="font-weight:bold; color:var(--success-color);">-</td></tr>
+                    <tr><th>Trouble Berulang?</th><td id="dtBerulang">-</td></tr>
+                    <tr><th>Jumlah Kejadian</th><td id="dtJumlah">-</td></tr>
+                    <tr><th>Shot/Cycle</th><td id="dtShot">-</td></tr>
+                    <tr><th>PIC/Technician</th><td id="dtPic">-</td></tr>
+                    <tr><th>Catatan/Follow Up</th><td id="dtCatatan">-</td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Aksi Lapangan & Input Data</h2>
+                <div class="action-buttons">
+                    <a id="btnGoogleForm" href="https://forms.google.com" target="_blank" class="btn-action-full btn-form">
+                        📝 Input Trouble/Repair (Google Form)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // LINK WEB APP GOOGLE SHEETS ANDA
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuCU_SPOUPRXgKa5HDfYRpH1tyQix4V6o3EUbE930EvsrpmPO5OJLAhOAEZrnFfQOp/exec";
+
+        let moldDatabase = {};
+
+        // AMBIL DATA DARI GOOGLE SHEETS SAAT HALAMAN DIBUKA
+        function loadDataFromSheet() {
+            fetch(SCRIPT_URL)
+                .then(res => res.json())
+                .then(data => {
+                    moldDatabase = {};
+                    data.forEach(row => {
+                        // Menggunakan kolom 'mold' atau 'id' sebagai kunci
+                        let id = row.mold || row.id;
+                        if (id) {
+                            moldDatabase[id] = {
+                                id: id,
+                                nama: row.nama || "-",
+                                produk: row.produk || "-",
+                                posisi: row.posisi || "-",
+                                status: row.status || "Siap Produksi",
+                                riwayatTerakhir: {
+                                    tanggal: row.tanggal || "-",
+                                    jam: row.jam || "-",
+                                    mesin: row.mesin || "-",
+                                    jenis: row.jenisTrouble || "-",
+                                    lokasi: row.lokasiTrouble || "-",
+                                    bagian: row.bagianMold || "-",
+                                    penyebab: row.penyebab || "-",
+                                    detailPenyebab: row.detailPenyebab || "-",
+                                    tindakan: row.tindakanRepair || "-",
+                                    finishing: row.finishing || "-",
+                                    durasi: row.durasiRepair || "-",
+                                    hasil: row.hasilTrial || "-",
+                                    berulang: row.troubleBerulang || "-",
+                                    jumlah: row.jumlahKejadian || "-",
+                                    shot: row.shotCycle || "-",
+                                    pic: row.picTechnician || "-",
+                                    catatan: row.catatanFollowUp || "-"
+                                }
+                            };
+                        }
+                    });
+                    renderMoldGrid();
+                    
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const moldId = urlParams.get('id');
+                    if (moldId && moldDatabase[moldId]) {
+                        openDetail(moldId, false);
+                    }
+                })
+                .catch(err => {
+                    console.error("Gagal memuat data:", err);
+                    document.getElementById('moldGrid').innerHTML = `<div class="empty-state" style="color:red;">Gagal memuat data dari Spreadsheet. Periksa koneksi internet Anda.</div>`;
+                });
         }
-    };
 
-    // 2. FUNGSI UNTUK MENGAMBIL PARAMETER URL
-    function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
-    }
-
-    // 3. FUNGSI UNTUK MENAMPILKAN DATA
-    function displayData() {
-        const moldId = getQueryParam('id');
-        const contentArea = document.getElementById('content-area');
-
-        if (!moldId) {
-            contentArea.innerHTML = `<div class="error-msg">Silakan scan QR Code yang valid pada Mold.</div>`;
-            return;
+        function openModal() { document.getElementById('modalTambah').classList.remove('hidden'); }
+        function closeModal() { 
+            document.getElementById('modalTambah').classList.add('hidden');
+            document.getElementById('inputID').value = '';
+            document.getElementById('inputNama').value = '';
+            document.getElementById('inputProduk').value = '';
+            document.getElementById('inputPosisi').value = '';
         }
 
-        const data = moldDatabase[moldId];
+        // SIMPAN MOLD BARU LANGSUNG KE GOOGLE SHEETS
+        function simpanMold() {
+            const id = document.getElementById('inputID').value.trim();
+            if(!id) { alert("ID/No Mold tidak boleh kosong!"); return; }
 
-        if (data) {
-            // Render list trouble
-            let troubleHTML = '<ul class="trouble-list">';
-            data.troubleSering.forEach(t => {
-                troubleHTML += `<li>${t}</li>`;
+            const newData = {
+                id: id,
+                mold: id,
+                nama: document.getElementById('inputNama').value || "-",
+                produk: document.getElementById('inputProduk').value || "-",
+                posisi: document.getElementById('inputPosisi').value || "-",
+                status: document.getElementById('inputStatus').value
+            };
+
+            // Kirim data ke Google Sheets via Fetch API
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(newData)
+            }).then(() => {
+                alert("Data berhasil disimpan ke Spreadsheet!");
+                closeModal();
+                setTimeout(loadDataFromSheet, 1500); // Muat ulang data setelah 1.5 detik
+            }).catch(err => {
+                alert("Terjadi kesalahan saat menyimpan.");
+                console.error(err);
             });
-            troubleHTML += '</ul>';
-
-            // Render HTML ke dalam web
-            contentArea.innerHTML = `
-                <div class="card">
-                    <h2>ID: ${moldId}</h2>
-                    <div class="info-row">
-                        <span class="info-label">Nama Mold:</span>
-                        <span class="info-value">${data.nama}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Status Saat Ini:</span>
-                        <span class="info-value" style="font-weight: bold; color: ${data.status === 'Sedang di-Repair' ? '#d9534f' : '#5cb85c'}">${data.status}</span>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2>Spesifikasi & Riwayat</h2>
-                    <div class="info-row">
-                        <span class="info-label">Tanggal Pembuatan:</span>
-                        <span class="info-value">${data.pembuatan}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Terakhir Maintenance:</span>
-                        <span class="info-value">${data.terakhirMaintenance}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Posisi Mold:</span>
-                        <span class="info-value">${data.posisi}</span>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2>Riwayat Trouble (Sering Terjadi)</h2>
-                    ${troubleHTML}
-                </div>
-            `;
-        } else {
-            contentArea.innerHTML = `<div class="error-msg">Data Mold dengan ID "${moldId}" tidak ditemukan di sistem.</div>`;
         }
-    }
 
-    // Jalankan fungsi saat web selesai dimuat
-    window.onload = displayData;
-</script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebarMenu');
+            const overlay = document.getElementById('overlay');
+            if (sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active'); overlay.style.display = 'none';
+            } else {
+                sidebar.classList.add('active'); overlay.style.display = 'block';
+            }
+        }
 
+        function hideAllViews() {
+            document.getElementById('view-welcome').classList.add('hidden');
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-maintenance').classList.add('hidden');
+            document.getElementById('view-detail').classList.add('hidden');
+        }
+
+        function showView(viewId, pushHistory = true) {
+            hideAllViews();
+            document.getElementById(viewId).classList.remove('hidden');
+            document.getElementById('sidebarMenu').classList.remove('active');
+            document.getElementById('overlay').style.display = 'none';
+            
+            if (pushHistory) {
+                window.history.pushState({ view: viewId }, '', window.location.pathname + (viewId !== 'view-welcome' ? `?view=${viewId}` : ''));
+            }
+        }
+
+        function goBack() {
+            if (window.history.length > 1 && window.history.state) {
+                window.history.back();
+            } else {
+                showView('view-home');
+            }
+        }
+
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.view) {
+                if (event.state.view === 'view-detail' && event.state.id) {
+                    openDetail(event.state.id, false);
+                } else {
+                    showView(event.state.view, false);
+                }
+            } else {
+                const urlParams = new URLSearchParams(window.location.search);
+                const moldId = urlParams.get('id');
+                if (moldId && moldDatabase[moldId]) {
+                    openDetail(moldId, false);
+                } else {
+                    showView('view-welcome', false);
+                }
+            }
+        });
+
+        function renderMoldGrid() {
+            const grid = document.getElementById('moldGrid');
+            grid.innerHTML = '';
+            
+            let total = 0, siap = 0, repair = 0;
+            const keys = Object.keys(moldDatabase);
+
+            if (keys.length === 0) {
+                grid.innerHTML = `<div class="empty-state">Belum ada data Mold di Spreadsheet. Klik "+ Tambah Asset Mold" di atas.</div>`;
+            } else {
+                keys.forEach(id => {
+                    const item = moldDatabase[id];
+                    const card = document.createElement('div');
+                    card.className = 'mold-card';
+                    card.onclick = () => openDetail(id);
+
+                    let statusClass = 'status-ready';
+                    total++;
+                    if (item.status === 'Sedang di-Repair') {
+                        statusClass = 'status-repair';
+                        repair++;
+                    } else {
+                        siap++;
+                    }
+
+                    card.innerHTML = `
+                        <h3>${item.id}</h3>
+                        <p class="nama-mold">${item.nama}</p>
+                        <p class="nama-produk">Prd: ${item.produk}</p>
+                        <span class="status-badge ${statusClass}">${item.status}</span>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statSiap').innerText = siap;
+            document.getElementById('statRepair').innerText = repair;
+        }
+
+        function filterMold() {
+            const input = document.getElementById('searchInput').value.toUpperCase();
+            const cards = document.getElementsByClassName('mold-card');
+            for (let i = 0; i < cards.length; i++) {
+                const idMold = cards[i].getElementsByTagName('h3')[0].innerText.toUpperCase();
+                const namaMold = cards[i].getElementsByClassName('nama-mold')[0].innerText.toUpperCase();
+                const namaProduk = cards[i].getElementsByClassName('nama-produk')[0].innerText.toUpperCase();
+                
+                if (idMold.includes(input) || namaMold.includes(input) || namaProduk.includes(input)) {
+                    cards[i].style.display = "";
+                } else {
+                    cards[i].style.display = "none";
+                }
+            }
+        }
+
+        function openDetail(moldId, pushHistory = true) {
+            const data = moldDatabase[moldId];
+            if (!data) return;
+
+            hideAllViews();
+            document.getElementById('view-detail').classList.remove('hidden');
+
+            document.getElementById('detailTitle').innerText = `Detail ${data.id}`;
+            document.getElementById('detailNama').innerText = data.nama;
+            document.getElementById('detailStatus').innerText = data.status;
+            document.getElementById('detailPosisi').innerText = data.posisi;
+            document.getElementById('detailProduk').innerText = data.produk;
+
+            const r = data.riwayatTerakhir;
+            document.getElementById('dtTanggal').innerText = r.tanggal;
+            document.getElementById('dtJam').innerText = r.jam;
+            document.getElementById('dtMesin').innerText = r.mesin;
+            document.getElementById('dtJenis').innerText = r.jenis;
+            document.getElementById('dtLokasi').innerText = r.lokasi;
+            document.getElementById('dtBagian').innerText = r.bagian;
+            document.getElementById('dtPenyebab').innerText = r.penyebab;
+            document.getElementById('dtDetailPenyebab').innerText = r.detailPenyebab;
+            document.getElementById('dtTindakan').innerText = r.tindakan;
+            document.getElementById('dtFinishing').innerText = r.finishing;
+            document.getElementById('dtDurasi').innerText = r.durasi;
+            document.getElementById('dtHasil').innerText = r.hasil;
+            document.getElementById('dtBerulang').innerText = r.berulang;
+            document.getElementById('dtJumlah').innerText = r.jumlah;
+            document.getElementById('dtShot').innerText = r.shot;
+            document.getElementById('dtPic').innerText = r.pic;
+            document.getElementById('dtCatatan').innerText = r.catatan;
+
+            document.getElementById('btnGoogleForm').href = `https://forms.google.com`; 
+
+            if (pushHistory) {
+                window.history.pushState({ view: 'view-detail', id: moldId }, '', `?id=${moldId}`);
+            }
+        }
+
+        window.onload = () => {
+            if (!window.history.state) {
+                window.history.replaceState({ view: 'view-welcome' }, '', window.location.pathname);
+            }
+
+            loadDataFromSheet(); // Tarik data dari Google Sheets
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const viewParam = urlParams.get('view');
+            
+            if (viewParam) {
+                showView(viewParam, false);
+            } else {
+                showView('view-welcome', false);
+            }
+        };
+    </script>
 </body>
 </html>
