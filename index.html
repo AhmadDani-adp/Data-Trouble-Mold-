@@ -387,6 +387,11 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Target Produksi</label>
+                    <input type="number" id="ctrlTarget" placeholder="Contoh: 550">
+                </div>
+
+                <div class="form-group">
                     <label>Nama / ID Mold</label>
                     <input type="text" id="ctrlMold" placeholder="Contoh: MOLD-001">
                 </div>
@@ -894,6 +899,7 @@
             const lane = document.getElementById('ctrlLane').value;
             const shift = document.getElementById('ctrlShift').value;
             const ct = document.getElementById('ctrlCT').value.trim();
+            const target = document.getElementById('ctrlTarget').value.trim();
             const mold = document.getElementById('ctrlMold').value.trim();
             const produk = document.getElementById('ctrlProduk').value.trim();
             const kondisi = document.getElementById('ctrlKondisi').value;
@@ -921,6 +927,7 @@
                 lane: lane,
                 shift: shift,
                 ct: ct || "-",
+                target: target || "-",
                 mold: mold,
                 produk: produk,
                 kondisi: kondisi,
@@ -939,6 +946,7 @@
 
             // Reset field mesin tertentu untuk input berikutnya
             document.getElementById('ctrlCT').value = '';
+            document.getElementById('ctrlTarget').value = '';
             document.getElementById('ctrlMold').value = '';
             document.getElementById('ctrlProduk').value = '';
             document.getElementById('ctrlKondisi').value = 'OK';
@@ -991,6 +999,7 @@
             const mold = document.getElementById('ctrlMold').value.trim();
             if (mesin && mold) {
                 const ct = document.getElementById('ctrlCT').value.trim();
+                const target = document.getElementById('ctrlTarget').value.trim();
                 const produk = document.getElementById('ctrlProduk').value.trim();
                 const kondisi = document.getElementById('ctrlKondisi').value;
                 const permasalahan = document.getElementById('ctrlPermasalahan').value.trim();
@@ -998,7 +1007,7 @@
                 const baut = document.getElementById('ctrlBaut').value;
                 const limitSwitch = document.getElementById('ctrlLimitSwitch').value;
                 const hourlyData = getHourlyData();
-                targetList.push({ mesin, mold, ct, produk, kondisi, permasalahan, selangHidrolik, baut, limitSwitch, hourlyProduction: hourlyData });
+                targetList.push({ mesin, mold, ct, target, produk, kondisi, permasalahan, selangHidrolik, baut, limitSwitch, hourlyProduction: hourlyData });
             }
 
             if (targetList.length === 0) {
@@ -1014,6 +1023,7 @@
                 html += `${idx + 1}. ${item.mesin}\n` +
                         `*${item.mold}*\n` +
                         `* CT. : ${item.ct || "-"}\n` +
+                        `* Target : ${item.target || "-"}\n` +
                         `* Selang Hidrolik : ${item.selangHidrolik}\n` +
                         `* Kondisi Baut : ${item.baut || "-"}\n` +
                         `* Cek LS : ${item.limitSwitch || "-"}\n` +
@@ -1173,6 +1183,7 @@
             const mold = document.getElementById('ctrlMold').value.trim();
             if (mesin && mold) {
                 const ct = document.getElementById('ctrlCT').value.trim();
+                const target = document.getElementById('ctrlTarget').value.trim();
                 const produk = document.getElementById('ctrlProduk').value.trim();
                 const kondisi = document.getElementById('ctrlKondisi').value;
                 const permasalahan = document.getElementById('ctrlPermasalahan').value.trim();
@@ -1180,7 +1191,7 @@
                 const baut = document.getElementById('ctrlBaut').value;
                 const limitSwitch = document.getElementById('ctrlLimitSwitch').value;
                 const hourlyData = getHourlyData();
-                targetList.push({ mesin, mold, ct, produk, kondisi, permasalahan, selangHidrolik, baut, limitSwitch, hourlyProduction: hourlyData });
+                targetList.push({ mesin, mold, ct, target, produk, kondisi, permasalahan, selangHidrolik, baut, limitSwitch, hourlyProduction: hourlyData });
             }
 
             if (targetList.length === 0) {
@@ -1200,6 +1211,7 @@
                 pesan += `${idx + 1}.${item.mesin}\n` +
                          `*${item.mold}*\n` +
                          `* CT. : ${item.ct || "-"}\n` +
+                         `* Target : ${item.target || "-"}\n` +
                          `* Selang Hidrolik : ${item.selangHidrolik}\n` +
                          `* Kondisi Baut : ${item.baut || "-"}\n` +
                          `* Cek LS : ${item.limitSwitch || "-"}\n` +
