@@ -15,6 +15,7 @@
             --success-color: #28a745;
             --warning-color: #ffc107;
             --danger-color: #dc3545;
+            --whatsapp-color: #25d366;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,12 +44,12 @@
         .header-title h1 { font-size: 1.2rem; margin-bottom: 2px; color: var(--primary-color); }
         .header-title p { font-size: 0.75rem; color: #555; font-weight: 500; }
         
-        .menu-btn { font-size: 28px; cursor: pointer; color: var(--primary-color); background: none; border: none; padding: 5px; }
+        .menu-btn { font-size: 28px; cursor: pointer; color: var(--primary-color); background: none; border: none; padding: 5px; z-index: 1100; }
 
         .sidebar {
             position: fixed; top: 0; right: -250px; width: 250px; height: 100vh;
             background-color: #ffffff; box-shadow: -4px 0 15px rgba(0,0,0,0.1);
-            transition: right 0.3s ease; z-index: 1000; padding-top: 20px;
+            transition: right 0.3s ease; z-index: 2000; padding-top: 20px;
             border-left: 4px solid var(--primary-color);
         }
         .sidebar.active { right: 0; }
@@ -58,6 +59,13 @@
             text-decoration: none; font-weight: 600; border-bottom: 1px solid #eee; transition: background 0.2s;
         }
         .sidebar a:hover { background-color: #f8fafc; color: var(--primary-color); padding-left: 25px; }
+
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1500;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .overlay.active { opacity: 1; visibility: visible; }
 
         .container { max-width: 900px; margin: 25px auto; padding: 0 15px; }
 
@@ -96,9 +104,9 @@
         .stat-red { background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
 
         .quick-actions-title { font-size: 1rem; color: #555; margin-bottom: 15px; font-weight: 600; text-align: center; }
-        .quick-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; max-width: 600px; margin: 0 auto; }
+        .quick-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; max-width: 650px; margin: 0 auto; }
         .btn-action-main, .btn-action-outline {
-            padding: 12px 25px; font-size: 1rem; border-radius: 8px; cursor: pointer; font-weight: bold;
+            padding: 12px 20px; font-size: 0.95rem; border-radius: 8px; cursor: pointer; font-weight: bold;
             display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
             transition: all 0.2s; flex: 1; min-width: 150px; border: none;
         }
@@ -146,23 +154,64 @@
         .detail-table th { background-color: #f8fafc; width: 35%; color: #4a5568; font-weight: 600; }
         
         .action-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
-        .btn-action-full { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; color: white; transition: opacity 0.2s ease; }
+        .btn-action-full { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; color: white; transition: opacity 0.2s ease; cursor: pointer; border: none; width: 100%; }
         .btn-action-full:hover { opacity: 0.9; }
         .btn-form { background-color: #673ab7; }
         .btn-sheet { background-color: #0f9d58; }
+        .btn-pdf { background-color: #d9534f; }
+        .btn-wa { background-color: var(--whatsapp-color); }
         
         .hidden { display: none !important; }
+        .print-only { display: none; }
 
-        /* MODAL TAMBAH MOLD */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .hourly-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        .hourly-item {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .hourly-item label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .hourly-item input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2500; display: flex; align-items: center; justify-content: center; }
         .modal-box { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 12px; }
         .modal-box h2 { color: var(--primary-color); margin-bottom: 15px; font-size: 1.3rem; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #444; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 1rem; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
         .btn-cancel { background: #ccc; padding: 10px; border: none; border-radius: 6px; flex: 1; cursor: pointer; font-weight: bold; }
         .btn-save { background: var(--primary-color); color: white; padding: 10px; border: none; border-radius: 6px; flex: 1; cursor: pointer; font-weight: bold; }
+
+        @media print {
+            body { background: white; }
+            header, .sidebar, .overlay, .quick-actions, .toolbar, .btn-back, .action-buttons, button, .form-group, .card > h2, .card > p, .hourly-grid { display: none !important; }
+            .card { box-shadow: none; border: none; padding: 0; margin: 0; }
+            .container { max-width: 100%; margin: 0; padding: 0; }
+            .print-only { display: block !important; font-family: monospace; font-size: 14px; line-height: 1.5; color: #000; }
+            #view-fullday, #view-maintenance-trouble { display: block !important; }
+        }
 
         @media (max-width: 600px) {
             .header-title h1 { font-size: 1rem; }
@@ -190,12 +239,15 @@
 
     <div id="sidebarMenu" class="sidebar">
         <span class="close-btn" onclick="toggleSidebar()">&times;</span>
-        <a href="#" onclick="showView('view-welcome')">🏠 Beranda</a>
-        <a href="#" onclick="showView('view-home')">📋 Data Mold</a>
-        <a href="#" onclick="showView('view-maintenance')">🔧 Data Maintenance</a>
+        <a href="#" onclick="showView('view-welcome'); return false;">🏠 Beranda</a>
+        <a href="#" onclick="showView('view-home'); return false;">📋 Data Mold</a>
+        <a href="#" onclick="showView('view-control'); return false;">⚙️ Control Mold Produksi</a>
+        <a href="#" onclick="showView('view-maintenance-trouble'); return false;">🛠️ Laporan Maintenance & Trouble</a>
+        <a href="#" onclick="showView('view-fullday'); return false;">📄 Rekap Full Day (Malam-Sore)</a>
+        <a href="#" onclick="showView('view-maintenance'); return false;">🔧 Data Maintenance & PDF</a>
     </div>
 
-    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:900;" onclick="toggleSidebar()"></div>
+    <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
     <div id="modalTambah" class="modal-overlay hidden">
         <div class="modal-box">
@@ -265,11 +317,11 @@
                     <button class="btn-action-main" onclick="showView('view-home')">
                         🔍 Cari / Daftar Mold
                     </button>
-                    <a href="https://forms.google.com" target="_blank" class="btn-action-outline">
-                        📝 Input Form Trouble
-                    </a>
-                    <button class="btn-action-outline" onclick="showView('view-maintenance')">
-                        📊 Rekap Data
+                    <button class="btn-action-main" style="background-color: #673ab7;" onclick="showView('view-control')">
+                        ⚙️ Control Mold
+                    </button>
+                    <button class="btn-action-outline" onclick="showView('view-maintenance-trouble')">
+                        🛠️ Laporan Maintenance & Trouble
                     </button>
                 </div>
             </div>
@@ -289,13 +341,236 @@
             </div>
         </div>
 
-        <div id="view-maintenance" class="hidden">
+        <!-- HALAMAN CONTROL MOLD PRODUKSI -->
+        <div id="view-control" class="hidden">
+            <button class="btn-back" onclick="showView('view-welcome')">← Beranda</button>
             <div class="card">
-                <h2>Rekap Data Maintenance</h2>
-                <p style="color: #666; margin-bottom: 20px;">Halaman rekap jadwal dan laporan keseluruhan maintenance dari Spreadsheet.</p>
-                <a id="btnMasterSheet" href="https://docs.google.com/spreadsheets/d/12N7J-DbGInr_h_alEdMwsmmLRSGl7CNqn-oLI_sLHUQ/edit" target="_blank" class="btn-action-full btn-sheet">
-                    📊 Buka Master Data (Spreadsheet)
-                </a>
+                <h2>Control Mold Produksi</h2>
+                <p style="color: #666; margin-bottom: 20px;">Form pengecekan operasional mesin, kondisi mold, dan input jumlah produksi per jam berdasarkan shift.</p>
+                
+                <div class="form-group">
+                    <label>Tanggal Laporan</label>
+                    <input type="date" id="ctrlTanggal">
+                </div>
+
+                <div class="form-group">
+                    <label>Lane</label>
+                    <select id="ctrlLane" onchange="updateLaneMachines()">
+                        <option value="Lane 1">Lane 1</option>
+                        <option value="Lane 2">Lane 2</option>
+                        <option value="Lane 3">Lane 3</option>
+                        <option value="Lane 4">Lane 4</option>
+                        <option value="Lane 5">Lane 5</option>
+                        <option value="Lane 6">Lane 6</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Nama / Nomor Mesin</label>
+                    <select id="ctrlMesin">
+                        <!-- Populated dynamically based on Lane -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Shift</label>
+                    <select id="ctrlShift" onchange="updateShiftHours()">
+                        <option value="Pagi">🌅 Pagi (09:00 - 15:00)</option>
+                        <option value="Sore">🌆 Sore (17:00 - 23:00)</option>
+                        <option value="Malam">🌙 Malam (01:00 - 07:00)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>CT (Cycle Time)</label>
+                    <input type="number" id="ctrlCT" placeholder="Contoh: 50">
+                </div>
+
+                <div class="form-group">
+                    <label>Nama / ID Mold</label>
+                    <input type="text" id="ctrlMold" placeholder="Contoh: MOLD-001">
+                </div>
+
+                <div class="form-group">
+                    <label>Nama Produk</label>
+                    <input type="text" id="ctrlProduk" placeholder="Nama produk...">
+                </div>
+
+                <div class="form-group">
+                    <label>Kondisi Produk</label>
+                    <select id="ctrlKondisi" onchange="togglePermasalahan()">
+                        <option value="OK">OK</option>
+                        <option value="NG">NG</option>
+                    </select>
+                </div>
+
+                <div class="form-group hidden" id="groupJenisPermasalahan">
+                    <label>Jenis Permasalahan</label>
+                    <input type="text" id="ctrlPermasalahan" placeholder="Masukkan jenis permasalahan secara manual...">
+                </div>
+
+                <div class="form-group">
+                    <label>Kondisi Selang Hidrolik</label>
+                    <select id="ctrlSelangHidrolik">
+                        <option value="OK">OK</option>
+                        <option value="Tidak">Tidak</option>
+                        <option value="Bocor Netes">Bocor Netes</option>
+                        <option value="Tidak Bocor">Tidak Bocor</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Kondisi Baut</label>
+                    <select id="ctrlBaut">
+                        <option value="Kencang">Kencang</option>
+                        <option value="Tidak">Tidak</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Kondisi Hidrolik</label>
+                    <select id="ctrlHidrolik">
+                        <option value="Tidak Bocor">Tidak Bocor</option>
+                        <option value="Ada Kebocoran">Ada Kebocoran</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Cek LS (Limit Switch)</label>
+                    <select id="ctrlLimitSwitch">
+                        <option value="Normal / Berfungsi">Normal / Berfungsi</option>
+                        <option value="Tidak Berfungsi">Tidak Berfungsi</option>
+                        <option value="Longgar / Bergeser">Longgar / Bergeser</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-top: 25px;">
+                    <label style="font-size: 1rem; color: var(--primary-color); margin-bottom: 8px; border-bottom: 2px solid var(--border-color); padding-bottom: 4px;" id="labelHourlyTitle">Jumlah Produksi Per Jam</label>
+                    <div class="hourly-grid" id="hourlyGrid">
+                        <!-- Generated via JS -->
+                    </div>
+                </div>
+
+                <!-- Print-only container for hourly output PDF export -->
+                <div id="printReportContainer" class="print-only"></div>
+
+                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed var(--primary-color); text-align: left; margin-top: 20px;">
+                    <p id="batchCounter" style="margin-bottom: 10px; font-weight: bold; color: var(--primary-color); text-align: center;">Daftar Mesin dalam Batch: 0 Mesin</p>
+                    <div id="batchListContainer" style="margin-bottom: 15px; max-height: 160px; overflow-y: auto;">
+                        <p style="color: #888; font-size: 0.85rem; text-align: center;">Belum ada mesin dalam batch.</p>
+                    </div>
+                    <button type="button" class="btn-action-full" style="background-color: #17a2b8;" onclick="tambahMesinKeBatch()">➕ Tambah Mesin Ini ke Daftar Batch</button>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 25px; flex-wrap: wrap;">
+                    <button class="btn-action-full btn-save" style="flex: 1;" onclick="simpanControlMold()">📊 Simpan ke Spreadsheet</button>
+                    <button class="btn-action-full btn-pdf" style="flex: 1;" onclick="cetakPDFControl()">🖨️ Cetak PDF</button>
+                    <button class="btn-action-full btn-wa" style="flex: 1;" onclick="kirimControlKeWA()">💬 Kirim ke WhatsApp</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HALAMAN LAPORAN MAINTENANCE & TROUBLE -->
+        <div id="view-maintenance-trouble" class="hidden">
+            <button class="btn-back" onclick="showView('view-welcome')">← Beranda</button>
+            <div class="card">
+                <h2>Laporan Maintenance & Trouble Harian</h2>
+                <p style="color: #666; margin-bottom: 20px;">Catat log aktivitas perbaikan, trouble, dan status pemeliharaan mold secara terstruktur.</p>
+
+                <div class="form-group">
+                    <label>Tanggal Log</label>
+                    <input type="date" id="maintTanggal">
+                </div>
+                <div class="form-group">
+                    <label>Shift</label>
+                    <select id="maintShift">
+                        <option value="Pagi">🌅 Pagi</option>
+                        <option value="Sore">🌆 Sore</option>
+                        <option value="Malam">🌙 Malam</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nama / ID Mold</label>
+                    <input type="text" id="maintMold" placeholder="Contoh: Pintu 31 Flat">
+                </div>
+                <div class="form-group">
+                    <label>Nama Mesin</label>
+                    <input type="text" id="maintMesin" placeholder="Contoh: Mesin 02">
+                </div>
+                <div class="form-group">
+                    <label>Kendala / Jenis Trouble</label>
+                    <input type="text" id="maintTrouble" placeholder="Contoh: Core A Out error / Ejektor seret">
+                </div>
+                <div class="form-group">
+                    <label>Tindakan Perbaikan</label>
+                    <input type="text" id="maintTindakan" placeholder="Contoh: Kencangkan tuas L'S / Lumasi ejektor">
+                </div>
+                <div class="form-group">
+                    <label>Waktu Pengerjaan (Jam)</label>
+                    <input type="text" id="maintWaktu" placeholder="Contoh: 08:33 - 08:36">
+                </div>
+                <div class="form-group">
+                    <label>Status / Hasil</label>
+                    <select id="maintStatus">
+                        <option value="✅ Selesai / Normal">✅ Selesai / Normal</option>
+                        <option value="🔄 Lanjut Finishing">🔄 Lanjut Finishing</option>
+                        <option value="⚠️ Pending / Cek Ulang">⚠️ Pending / Cek Ulang</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 25px; flex-wrap: wrap;">
+                    <button class="btn-action-full btn-save" style="flex: 1;" onclick="simpanMaintenanceLog()">Simpan Log Maintenance</button>
+                    <button class="btn-action-full btn-wa" style="flex: 1;" onclick="kirimMaintenanceKeWA()">📤 Kirim Semua ke WhatsApp</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Riwayat Log Maintenance Tersimpan</h2>
+                <div id="maintenanceLogContent" style="overflow-x: auto;">
+                    <p style="color: #888; text-align: center; padding: 10px;">Belum ada log maintenance tercatat.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- HALAMAN REKAP FULL DAY (MALAM - SORE) PDF -->
+        <div id="view-fullday" class="hidden">
+            <button class="btn-back" onclick="showView('view-welcome')">← Beranda</button>
+            <div class="card">
+                <h2>Rekap Laporan Full Day (Malam s.d Sore)</h2>
+                <p style="color: #666; margin-bottom: 15px;">Gabungan seluruh shift dalam satu siklus harian lengkap (Shift Malam ➔ Pagi ➔ Sore) siap dicetak ke PDF.</p>
+                
+                <div class="form-group" style="max-width: 300px;">
+                    <label>Pilih Tanggal Rekap</label>
+                    <input type="date" id="filterTanggal" onchange="renderFullDayTable()">
+                </div>
+
+                <div id="fullDayContent" style="margin-top: 20px; overflow-x: auto;">
+                    <p style="color: #888; text-align: center; padding: 20px;">Silakan pilih tanggal untuk melihat rekapitulasi data.</p>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button onclick="window.print()" class="btn-action-full btn-pdf">
+                        🖨️ Cetak / Simpan Rekap Full Day ke PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HALAMAN MAINTENANCE & PDF -->
+        <div id="view-maintenance" class="hidden">
+            <button class="btn-back" onclick="showView('view-welcome')">← Beranda</button>
+            <div class="card">
+                <h2>Rekap Data & Cetak Laporan PDF</h2>
+                <p style="color: #666; margin-bottom: 20px;">Cetak laporan rekapitulasi maintenance langsung ke format PDF atau buka spreadsheet master.</p>
+                
+                <div class="action-buttons">
+                    <button onclick="window.print()" class="btn-action-full btn-pdf">
+                        🖨️ Cetak / Simpan Laporan ke PDF
+                    </button>
+                    <a id="btnMasterSheet" href="https://docs.google.com/spreadsheets/d/12N7J-DbGInr_h_alEdMwsmmLRSGl7CNqn-oLI_sLHUQ/edit" target="_blank" class="btn-action-full btn-sheet">
+                        📊 Buka Master Data (Google Sheets)
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -347,19 +622,126 @@
     </div>
 
     <script>
-        // LINK WEB APP GOOGLE SHEETS ANDA
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuCU_SPOUPRXgKa5HDfYRpH1tyQix4V6o3EUbE930EvsrpmPO5OJLAhOAEZrnFfQOp/exec";
 
         let moldDatabase = {};
+        let allControlRecords = [];
+        let allMaintenanceLogs = [];
+        let currentBatchMachines = [];
 
-        // AMBIL DATA DARI GOOGLE SHEETS SAAT HALAMAN DIBUKA
+        // Mapping mesin berdasarkan Denah Mesin PDF per Lane[cite: 1]
+        const laneMachines = {
+            "Lane 1": [
+                "BOLE 230 EK II", "BLAZE 220 1", "HTF 200 J1", "HTF 200 W9", "HTF 200 W3", 
+                "HTF 200 W8", "HTF 200 W7", "HTF 200 W6", "HTF 200 W1", "HTF 200 W2", 
+                "HT 200 1", "MA 200 GII 1", "HTW 260", "HTF 160 X1", "HTF 160 W1", 
+                "HTF 150 X2", "HTF 80", "HTF 90 W1", "HTF 90 W2", "MA 120 GII 1", "MA 86 GII 1"
+            ],
+            "Lane 2": [
+                "CLF 750 TX", "MA 1000 GI 1", "HTF 800 W5", "HTF 800 W7", "HTF 700 W15", 
+                "CLF 950 TX", "HTF 1000 W", "HTF 700 W14", "MA 650 G2 + PRN 6", "HXM 736", 
+                "HTF 800 W6 + PRN 11"
+            ],
+            "Lane 3": [
+                "HTF 700 W13", "HTF 700 W9", "HTF 700 W12", "HTF 700 W5", "HTF 700 W6 + PRN 17", 
+                "HTF 700 W2", "MA 700 2", "MA 700 1", "HTF 700 W8", "HTF 700 W3", 
+                "MA 650 G1 + PRN 20", "HTF 700 W4"
+            ],
+            "Lane 4": [
+                "HTF 540 X3", "HTF 450 XU", "HTF 470 W4", "HTF 470 W10", "HTF 380 W2", 
+                "HTF 320 W2", "HTF 470 W2", "HTF 450 X6", "HTF 470 W15", "HTF 470 W13", 
+                "HTF 470 W9", "MA 450 GI 1", "MA 450 GI 2"
+            ],
+            "Lane 5": [
+                "MA 650 GI 6 + PRN 3", "MA 650 GI 3", "MA 650 GI 4", "MA 650 GI 7 + PRN 4", 
+                "MA 650 GI 8 + PRN 13", "MA 650 GI 5 + PRN 2", "MA 450 GII 5 + PRT 15", 
+                "HXM 530 1", "MA 450 GII 10", "MA 450 GII 1", "MA 450 GII 2 + PRN 16", 
+                "MA 450 GII 7 + PRT 14", "MA 450 GII 4", "MA 450 GII 6 + PRT 8", 
+                "MA 450 GII 9 + PRN 10", "MA 450 GII 8 + PRT 9"
+            ],
+            "Lane 6": [
+                "HTF 470 W3", "HTF 450 X7", "HTF 380 W3", "HXW 488", "HXM 530 2"
+            ]
+        };
+
+        function updateLaneMachines() {
+            const laneSelect = document.getElementById('ctrlLane');
+            const mesinSelect = document.getElementById('ctrlMesin');
+            const selectedLane = laneSelect.value;
+
+            mesinSelect.innerHTML = '';
+            const machines = laneMachines[selectedLane] || [];
+
+            machines.forEach(mach => {
+                const opt = document.createElement('option');
+                opt.value = mach;
+                opt.textContent = mach;
+                mesinSelect.appendChild(opt);
+            });
+        }
+
+        function setDefaultDate() {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('ctrlTanggal');
+            if (dateInput) dateInput.value = today;
+            const filterDate = document.getElementById('filterTanggal');
+            if (filterDate) filterDate.value = today;
+            const maintDate = document.getElementById('maintTanggal');
+            if (maintDate) maintDate.value = today;
+
+            updateLaneMachines();
+        }
+
+        function updateShiftHours() {
+            const shift = document.getElementById('ctrlShift').value;
+            const grid = document.getElementById('hourlyGrid');
+            const labelTitle = document.getElementById('labelHourlyTitle');
+            grid.innerHTML = '';
+            
+            let start = 9, end = 15, shiftName = "Pagi (09:00 - 15:00)";
+            if (shift === 'Sore') {
+                start = 17; end = 23; shiftName = "Sore (17:00 - 23:00)";
+            } else if (shift === 'Malam') {
+                start = 1; end = 7; shiftName = "Malam (01:00 - 07:00)";
+            }
+            
+            labelTitle.innerText = `Jumlah Produksi Per Jam - Shift ${shiftName}`;
+
+            for (let i = start; i <= end; i++) {
+                let hourStr = i < 10 ? `0${i}:00` : `${i}:00`;
+                
+                const div = document.createElement('div');
+                div.className = 'hourly-item';
+                div.innerHTML = `
+                    <label>${hourStr}</label>
+                    <input type="number" id="hour_pcs_${i}" placeholder="pcs" value="" style="margin-bottom: 4px;">
+                    <input type="text" id="hour_note_${i}" placeholder="Catatan cth: Gosok mold, 3mnt" value="" style="width: 100%; padding: 4px; font-size: 0.75rem; border: 1px solid #ccc; border-radius: 4px; text-align: center;">
+                `;
+                grid.appendChild(div);
+            }
+        }
+
         function loadDataFromSheet() {
+            const savedLocal = localStorage.getItem('localControlRecords');
+            if (savedLocal) {
+                try {
+                    allControlRecords = JSON.parse(savedLocal);
+                } catch(e) { allControlRecords = []; }
+            }
+
+            const savedMaint = localStorage.getItem('localMaintenanceLogs');
+            if (savedMaint) {
+                try {
+                    allMaintenanceLogs = JSON.parse(savedMaint);
+                } catch(e) { allMaintenanceLogs = []; }
+            }
+            renderMaintenanceLogs();
+
             fetch(SCRIPT_URL)
                 .then(res => res.json())
                 .then(data => {
                     moldDatabase = {};
                     data.forEach(row => {
-                        // Menggunakan kolom 'mold' atau 'id' sebagai kunci
                         let id = row.mold || row.id;
                         if (id) {
                             moldDatabase[id] = {
@@ -389,8 +771,15 @@
                                 }
                             };
                         }
+                        if (row.action === 'controlProduksi' || row.shift) {
+                            const exists = allControlRecords.some(item => item.tanggal === row.tanggal && item.shift === row.shift && item.mesin === row.mesin);
+                            if (!exists) {
+                                allControlRecords.push(row);
+                            }
+                        }
                     });
                     renderMoldGrid();
+                    renderFullDayTable();
                     
                     const urlParams = new URLSearchParams(window.location.search);
                     const moldId = urlParams.get('id');
@@ -399,8 +788,9 @@
                     }
                 })
                 .catch(err => {
-                    console.error("Gagal memuat data:", err);
-                    document.getElementById('moldGrid').innerHTML = `<div class="empty-state" style="color:red;">Gagal memuat data dari Spreadsheet. Periksa koneksi internet Anda.</div>`;
+                    console.log("Menggunakan data lokal offline.");
+                    renderMoldGrid();
+                    renderFullDayTable();
                 });
         }
 
@@ -413,7 +803,6 @@
             document.getElementById('inputPosisi').value = '';
         }
 
-        // SIMPAN MOLD BARU LANGSUNG KE GOOGLE SHEETS
         function simpanMold() {
             const id = document.getElementById('inputID').value.trim();
             if(!id) { alert("ID/No Mold tidak boleh kosong!"); return; }
@@ -427,7 +816,6 @@
                 status: document.getElementById('inputStatus').value
             };
 
-            // Kirim data ke Google Sheets via Fetch API
             fetch(SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
@@ -436,26 +824,500 @@
             }).then(() => {
                 alert("Data berhasil disimpan ke Spreadsheet!");
                 closeModal();
-                setTimeout(loadDataFromSheet, 1500); // Muat ulang data setelah 1.5 detik
+                setTimeout(loadDataFromSheet, 1500);
             }).catch(err => {
                 alert("Terjadi kesalahan saat menyimpan.");
                 console.error(err);
             });
         }
 
+        function togglePermasalahan() {
+            const kondisi = document.getElementById('ctrlKondisi').value;
+            const group = document.getElementById('groupJenisPermasalahan');
+            if (kondisi === 'NG') {
+                group.classList.remove('hidden');
+            } else {
+                group.classList.add('hidden');
+                document.getElementById('ctrlPermasalahan').value = '';
+            }
+        }
+
+        function getHourlyData() {
+            let hourlyObj = {};
+            const shift = document.getElementById('ctrlShift').value;
+            let start = 9, end = 15;
+            if (shift === 'Sore') { start = 17; end = 23; }
+            else if (shift === 'Malam') { start = 1; end = 7; }
+
+            for (let i = start; i <= end; i++) {
+                let hourStr = i < 10 ? `0${i}:00` : `${i}:00`;
+                const pcsEl = document.getElementById(`hour_pcs_${i}`);
+                const noteEl = document.getElementById(`hour_note_${i}`);
+                if (pcsEl && pcsEl.value) {
+                    hourlyObj[hourStr] = {
+                        pcs: pcsEl.value,
+                        note: noteEl ? noteEl.value.trim() : ''
+                    };
+                }
+            }
+            return hourlyObj;
+        }
+
+        function renderBatchList() {
+            const container = document.getElementById('batchListContainer');
+            document.getElementById('batchCounter').innerText = `Daftar Mesin dalam Batch: ${currentBatchMachines.length} Mesin`;
+            
+            if (currentBatchMachines.length === 0) {
+                container.innerHTML = `<p style="color: #888; font-size: 0.85rem; text-align: center;">Belum ada mesin dalam batch.</p>`;
+                return;
+            }
+
+            let html = `<ul style="list-style-type: none; padding: 0; font-size: 0.85rem;">`;
+            currentBatchMachines.forEach((item, index) => {
+                html += `<li style="background: white; padding: 6px 10px; margin-bottom: 5px; border-radius: 4px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <span><strong>${index + 1}. ${item.mesin}</strong> (${item.mold} - ${item.kondisi})</span>
+                    <button type="button" onclick="hapusDariBatch(${index})" style="background: #dc3545; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; font-size: 0.75rem;">Hapus</button>
+                </li>`;
+            });
+            html += `</ul>`;
+            container.innerHTML = html;
+        }
+
+        function hapusDariBatch(index) {
+            currentBatchMachines.splice(index, 1);
+            renderBatchList();
+        }
+
+        function tambahMesinKeBatch() {
+            const tanggal = document.getElementById('ctrlTanggal').value;
+            const mesin = document.getElementById('ctrlMesin').value.trim();
+            const lane = document.getElementById('ctrlLane').value;
+            const shift = document.getElementById('ctrlShift').value;
+            const ct = document.getElementById('ctrlCT').value.trim();
+            const mold = document.getElementById('ctrlMold').value.trim();
+            const produk = document.getElementById('ctrlProduk').value.trim();
+            const kondisi = document.getElementById('ctrlKondisi').value;
+            const permasalahan = document.getElementById('ctrlPermasalahan').value.trim();
+            const selangHidrolik = document.getElementById('ctrlSelangHidrolik').value;
+            const baut = document.getElementById('ctrlBaut').value;
+            const hidrolik = document.getElementById('ctrlHidrolik').value;
+            const limitSwitch = document.getElementById('ctrlLimitSwitch').value;
+            const hourlyData = getHourlyData();
+
+            if (!mesin || !mold || !tanggal) {
+                alert("Tanggal, Nama Mesin, dan ID/Nama Mold wajib diisi!");
+                return;
+            }
+
+            if (kondisi === 'NG' && !permasalahan) {
+                alert("Karena kondisi produk NG, Jenis Permasalahan wajib diisi!");
+                return;
+            }
+
+            const payload = {
+                action: 'controlProduksi',
+                tanggal: tanggal,
+                mesin: mesin,
+                lane: lane,
+                shift: shift,
+                ct: ct || "-",
+                mold: mold,
+                produk: produk,
+                kondisi: kondisi,
+                permasalahan: kondisi === 'NG' ? permasalahan : '-',
+                selangHidrolik: selangHidrolik,
+                baut: baut,
+                hidrolik: hidrolik,
+                limitSwitch: limitSwitch,
+                hourlyProduction: hourlyData,
+                jamInput: new Date().toLocaleTimeString()
+            };
+
+            currentBatchMachines.push(payload);
+            renderBatchList();
+            alert(`Mesin ${mesin} (${mold}) berhasil ditambahkan ke antrean batch! Silakan isi mesin berikutnya.`);
+
+            // Reset field mesin tertentu untuk input berikutnya
+            document.getElementById('ctrlCT').value = '';
+            document.getElementById('ctrlMold').value = '';
+            document.getElementById('ctrlProduk').value = '';
+            document.getElementById('ctrlKondisi').value = 'OK';
+            togglePermasalahan();
+            const pcsInputs = document.querySelectorAll('.hourly-item input[type="number"]');
+            pcsInputs.forEach(inp => inp.value = '');
+            const noteInputs = document.querySelectorAll('.hourly-item input[type="text"]');
+            noteInputs.forEach(inp => inp.value = '');
+        }
+
+        function simpanControlMold() {
+            const mesin = document.getElementById('ctrlMesin').value.trim();
+            const mold = document.getElementById('ctrlMold').value.trim();
+            if (mesin && mold) {
+                tambahMesinKeBatch();
+            }
+
+            if (currentBatchMachines.length === 0) {
+                alert("Belum ada data mesin yang diinput dalam batch!");
+                return;
+            }
+
+            currentBatchMachines.forEach(payload => {
+                allControlRecords.push(payload);
+                fetch(SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify(payload)
+                });
+            });
+
+            localStorage.setItem('localControlRecords', JSON.stringify(allControlRecords));
+            alert("Seluruh data Control Mold Produksi dalam batch berhasil disimpan ke Spreadsheet!");
+            currentBatchMachines = [];
+            renderBatchList();
+            showView('view-fullday');
+        }
+
+        function cetakPDFControl() {
+            const tanggal = document.getElementById('ctrlTanggal').value;
+            const shift = document.getElementById('ctrlShift').value;
+
+            let shiftEmoji = "🌅";
+            if (shift === 'Sore') shiftEmoji = "🌆";
+            if (shift === 'Malam') shiftEmoji = "🌙";
+
+            let targetList = [...currentBatchMachines];
+            const mesin = document.getElementById('ctrlMesin').value.trim();
+            const mold = document.getElementById('ctrlMold').value.trim();
+            if (mesin && mold) {
+                const ct = document.getElementById('ctrlCT').value.trim();
+                const produk = document.getElementById('ctrlProduk').value.trim();
+                const kondisi = document.getElementById('ctrlKondisi').value;
+                const permasalahan = document.getElementById('ctrlPermasalahan').value.trim();
+                const selangHidrolik = document.getElementById('ctrlSelangHidrolik').value;
+                const baut = document.getElementById('ctrlBaut').value;
+                const limitSwitch = document.getElementById('ctrlLimitSwitch').value;
+                const hourlyData = getHourlyData();
+                targetList.push({ mesin, mold, ct, produk, kondisi, permasalahan, selangHidrolik, baut, limitSwitch, hourlyProduction: hourlyData });
+            }
+
+            if (targetList.length === 0) {
+                alert("Belum ada data mesin untuk dicetak!");
+                return;
+            }
+
+            let html = `*Laporan Output Perjam (Multi-Mesin)*\n` +
+                        `*Tgl ${tanggal}*\n` +
+                        `${shiftEmoji} *Shift ${shift}*\n\n`;
+
+            targetList.forEach((item, idx) => {
+                html += `${idx + 1}. ${item.mesin}\n` +
+                        `*${item.mold}*\n` +
+                        `* CT. : ${item.ct || "-"}\n` +
+                        `* Selang Hidrolik : ${item.selangHidrolik}\n` +
+                        `* Kondisi Baut : ${item.baut || "-"}\n` +
+                        `* Cek LS : ${item.limitSwitch || "-"}\n` +
+                        `* Kondisi Produk : ${item.kondisi}\n`;
+                if (item.kondisi === 'NG') {
+                    html += `* Permasalahan : ${item.permasalahan}\n`;
+                }
+                html += `\n`;
+
+                const shiftType = shift;
+                let start = 9, end = 15;
+                if (shiftType === 'Sore') { start = 17; end = 23; }
+                else if (shiftType === 'Malam') { start = 1; end = 7; }
+
+                let hObj = typeof item.hourlyProduction === 'string' ? JSON.parse(item.hourlyProduction) : item.hourlyProduction;
+                for (let i = start; i <= end; i++) {
+                    let hourStr = i < 10 ? `0${i}:00` : `${i}:00`;
+                    let hData = hObj ? hObj[hourStr] : null;
+                    if (hData) {
+                        let pcsVal = typeof hData === 'object' ? hData.pcs : hData;
+                        let noteVal = typeof hData === 'object' ? hData.note : '';
+                        if (pcsVal) {
+                            html += `${hourStr} : ${pcsVal} pcs${noteVal ? ' (' + noteVal + ')' : ''}\n`;
+                        } else {
+                            html += `${hourStr} :\n`;
+                        }
+                    } else {
+                        html += `${hourStr} :\n`;
+                    }
+                }
+                html += `---------------------------\n\n`;
+            });
+
+            document.getElementById('printReportContainer').innerText = html;
+            window.print();
+        }
+
+        function simpanMaintenanceLog() {
+            const tanggal = document.getElementById('maintTanggal').value;
+            const shift = document.getElementById('maintShift').value;
+            const mold = document.getElementById('maintMold').value.trim();
+            const mesin = document.getElementById('maintMesin').value.trim();
+            const trouble = document.getElementById('maintTrouble').value.trim();
+            const tindakan = document.getElementById('maintTindakan').value.trim();
+            const waktu = document.getElementById('maintWaktu').value.trim();
+            const status = document.getElementById('maintStatus').value;
+
+            if (!mold || !tanggal) {
+                alert("Tanggal dan Nama/ID Mold wajib diisi!");
+                return;
+            }
+
+            const record = { tanggal, shift, mold, mesin, trouble, tindakan, waktu, status };
+            allMaintenanceLogs.push(record);
+            localStorage.setItem('localMaintenanceLogs', JSON.stringify(allMaintenanceLogs));
+            alert("Log Maintenance & Trouble berhasil disimpan!");
+            
+            document.getElementById('maintMold').value = '';
+            document.getElementById('maintMesin').value = '';
+            document.getElementById('maintTrouble').value = '';
+            document.getElementById('maintTindakan').value = '';
+            document.getElementById('maintWaktu').value = '';
+
+            renderMaintenanceLogs();
+        }
+
+        function renderMaintenanceLogs() {
+            const container = document.getElementById('maintenanceLogContent');
+            if (!container) return;
+
+            if (allMaintenanceLogs.length === 0) {
+                container.innerHTML = `<p style="color: #888; text-align: center; padding: 10px;">Belum ada log maintenance tercatat.</p>`;
+                return;
+            }
+
+            let html = `
+                <table class="detail-table" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr style="background: #f8fafc;">
+                            <th>Tanggal / Shift</th>
+                            <th>Mold & Mesin</th>
+                            <th>Trouble & Tindakan</th>
+                            <th>Waktu & Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            allMaintenanceLogs.forEach((item, index) => {
+                html += `
+                    <tr>
+                        <td><strong>${item.tanggal}</strong><br><small>${item.shift}</small></td>
+                        <td><strong>${item.mold}</strong><br><small>${item.mesin || '-'}</small></td>
+                        <td><strong>Kendala:</strong> ${item.trouble || '-'}<br><strong>Tindakan:</strong> ${item.tindakan || '-'}</td>
+                        <td>${item.waktu || '-'}<br><span style="font-weight:bold;">${item.status}</span></td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function kirimMaintenanceKeWA() {
+            const tanggal = document.getElementById('maintTanggal').value;
+            const shift = document.getElementById('maintShift').value;
+
+            if (!tanggal || !shift) {
+                alert("Pilih Tanggal dan Shift terlebih dahulu!");
+                return;
+            }
+
+            const filteredLogs = allMaintenanceLogs.filter(item => item.tanggal === tanggal && item.shift === shift);
+
+            if (filteredLogs.length === 0) {
+                alert("Tidak ada log maintenance untuk Tanggal dan Shift tersebut. Silakan input dan simpan log terlebih dahulu.");
+                return;
+            }
+
+            let shiftEmoji = "🌅";
+            if (shift === 'Sore') shiftEmoji = "🌆";
+            if (shift === 'Malam') shiftEmoji = "🌙";
+
+            let pesan = `📋 *LAPORAN MAINTENANCE & TROUBLE*\n` +
+                        `🏢 PT Cahaya Buana Intitama\n` +
+                        `📅 Tanggal: ${tanggal}\n` +
+                        `${shiftEmoji} Shift: ${shift}\n\n` +
+                        `--- RUTE RUTIN ---\n` +
+                        `• Check Sheet Mould Produksi: ✅\n` +
+                        `• Gosok Mold On/Off Produksi: ✅\n\n` +
+                        `--- DETAIL TROUBLE & REPAIR ---\n`;
+
+            const angkaEmoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+
+            filteredLogs.forEach((item, index) => {
+                let nomorNum = angkaEmoji[index] || `${index + 1}.`;
+                let statusIcon = "✅";
+                if (item.status.includes('Finishing')) statusIcon = "🔄 Lanjut Finishing";
+                if (item.status.includes('Pending')) statusIcon = "⚠️ Pending";
+
+                pesan += `${nomorNum} ${item.mold}\n` +
+                         `   • Kendala: ${item.trouble || '-'}\n` +
+                         `   • Tindakan: ${item.tindakan || '-'}\n` +
+                         `   • Jam: ${item.waktu || '-'} (${statusIcon})\n\n`;
+            });
+
+            const url = `https://wa.me/?text=${encodeURIComponent(pesan)}`;
+            window.open(url, '_blank');
+        }
+
+        function kirimControlKeWA() {
+            const tanggal = document.getElementById('ctrlTanggal').value;
+            const shift = document.getElementById('ctrlShift').value;
+
+            let targetList = [...currentBatchMachines];
+            const mesin = document.getElementById('ctrlMesin').value.trim();
+            const mold = document.getElementById('ctrlMold').value.trim();
+            if (mesin && mold) {
+                const ct = document.getElementById('ctrlCT').value.trim();
+                const produk = document.getElementById('ctrlProduk').value.trim();
+                const kondisi = document.getElementById('ctrlKondisi').value;
+                const permasalahan = document.getElementById('ctrlPermasalahan').value.trim();
+                const selangHidrolik = document.getElementById('ctrlSelangHidrolik').value;
+                const baut = document.getElementById('ctrlBaut').value;
+                const limitSwitch = document.getElementById('ctrlLimitSwitch').value;
+                const hourlyData = getHourlyData();
+                targetList.push({ mesin, mold, ct, produk, kondisi, permasalahan, selangHidrolik, baut, limitSwitch, hourlyProduction: hourlyData });
+            }
+
+            if (targetList.length === 0) {
+                alert("Belum ada data mesin yang diinput untuk dikirim ke WhatsApp!");
+                return;
+            }
+
+            let shiftEmoji = "🌅";
+            if (shift === 'Sore') shiftEmoji = "🌆";
+            if (shift === 'Malam') shiftEmoji = "🌙";
+
+            let pesan = `*Laporan Output Perjam*\n` +
+                        `*Tgl ${tanggal}*\n` +
+                        `${shiftEmoji} *Shift ${shift}*\n\n`;
+
+            targetList.forEach((item, idx) => {
+                pesan += `${idx + 1}.${item.mesin}\n` +
+                         `*${item.mold}*\n` +
+                         `* CT. : ${item.ct || "-"}\n` +
+                         `* Selang Hidrolik : ${item.selangHidrolik}\n` +
+                         `* Kondisi Baut : ${item.baut || "-"}\n` +
+                         `* Cek LS : ${item.limitSwitch || "-"}\n` +
+                         `* Kondisi Produk : ${item.kondisi}\n`;
+                
+                if (item.kondisi === 'NG') {
+                    pesan += `* Permasalahan : ${item.permasalahan}\n`;
+                }
+
+                pesan += `\n`;
+
+                const shiftType = shift;
+                let start = 9, end = 15;
+                if (shiftType === 'Sore') { start = 17; end = 23; }
+                else if (shiftType === 'Malam') { start = 1; end = 7; }
+
+                let hObj = typeof item.hourlyProduction === 'string' ? JSON.parse(item.hourlyProduction) : item.hourlyProduction;
+                for (let i = start; i <= end; i++) {
+                    let hourStr = i < 10 ? `0${i}:00` : `${i}:00`;
+                    let hData = hObj ? hObj[hourStr] : null;
+                    if (hData) {
+                        let pcsVal = typeof hData === 'object' ? hData.pcs : hData;
+                        let noteVal = typeof hData === 'object' ? hData.note : '';
+                        if (pcsVal) {
+                            pesan += `${hourStr} : ${pcsVal} pcs${noteVal ? ' (' + noteVal + ')' : ''}\n`;
+                        } else {
+                            pesan += `${hourStr} :\n`;
+                        }
+                    } else {
+                        pesan += `${hourStr} :\n`;
+                    }
+                }
+                pesan += `\n`;
+            });
+
+            const url = `https://wa.me/?text=${encodeURIComponent(pesan)}`;
+            window.open(url, '_blank');
+
+            // Reset batch list automatically after sending to WhatsApp
+            currentBatchMachines = [];
+            renderBatchList();
+        }
+
+        function renderFullDayTable() {
+            const tanggalFilter = document.getElementById('filterTanggal').value;
+            const container = document.getElementById('fullDayContent');
+
+            const filtered = allControlRecords.filter(r => r.tanggal === tanggalFilter);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<p style="color: #888; text-align: center; padding: 20px;">Belum ada data untuk tanggal ${tanggalFilter || 'tersebut'}. Silakan input terlebih dahulu di menu <strong>Control Mold Produksi</strong>.</p>`;
+                return;
+            }
+
+            let html = `
+                <h3 style="color: var(--primary-color); margin-bottom: 10px; font-size: 1.1rem;">Rekap Siklus Harian (Malam ➔ Pagi ➔ Sore) - ${tanggalFilter}</h3>
+                <table class="detail-table" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr style="background: #f8fafc;">
+                            <th>Shift</th>
+                            <th>Mesin / Lane</th>
+                            <th>Mold / Produk</th>
+                            <th>Kondisi</th>
+                            <th>Ringkasan Produksi / Jam</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            const shiftOrder = ['Malam', 'Pagi', 'Sore'];
+            filtered.sort((a,b) => shiftOrder.indexOf(a.shift) - shiftOrder.indexOf(b.shift));
+
+            filtered.forEach(rec => {
+                let shiftEmoji = "🌅";
+                if (rec.shift === 'Sore') shiftEmoji = "🌆";
+                if (rec.shift === 'Malam') shiftEmoji = "🌙";
+
+                let hourlyText = "-";
+                try {
+                    let hObj = typeof rec.hourlyProduction === 'string' ? JSON.parse(rec.hourlyProduction) : rec.hourlyProduction;
+                    if (hObj) {
+                        hourlyText = Object.entries(hObj).map(([k,v]) => {
+                            if (typeof v === 'object' && v !== null) {
+                                return `${k}:${v.pcs}p${v.note ? ' ('+v.note+')':''}`;
+                            }
+                            return `${k}:${v}p`;
+                        }).join(', ');
+                    }
+                } catch(e) {}
+
+                html += `
+                    <tr>
+                        <td><strong>${shiftEmoji} ${rec.shift || '-'}</strong></td>
+                        <td>${rec.mesin || '-'}<br><small>${rec.lane || '-'}</small></td>
+                        <td><strong>${rec.mold || '-'}</strong><br><small>${rec.produk || '-'}</small></td>
+                        <td><span style="color:${rec.kondisi === 'OK' ? 'green':'red'}; font-weight:bold;">${rec.kondisi || '-'}</span></td>
+                        <td><small>${hourlyText}</small></td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebarMenu');
             const overlay = document.getElementById('overlay');
-            if (sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active'); overlay.style.display = 'none';
-            } else {
-                sidebar.classList.add('active'); overlay.style.display = 'block';
-            }
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
         }
 
         function hideAllViews() {
             document.getElementById('view-welcome').classList.add('hidden');
             document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-control').classList.add('hidden');
+            document.getElementById('view-maintenance-trouble').classList.add('hidden');
+            document.getElementById('view-fullday').classList.add('hidden');
             document.getElementById('view-maintenance').classList.add('hidden');
             document.getElementById('view-detail').classList.add('hidden');
         }
@@ -464,8 +1326,12 @@
             hideAllViews();
             document.getElementById(viewId).classList.remove('hidden');
             document.getElementById('sidebarMenu').classList.remove('active');
-            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('overlay').classList.remove('active');
             
+            if (viewId === 'view-fullday') {
+                renderFullDayTable();
+            }
+
             if (pushHistory) {
                 window.history.pushState({ view: viewId }, '', window.location.pathname + (viewId !== 'view-welcome' ? `?view=${viewId}` : ''));
             }
@@ -593,11 +1459,14 @@
         }
 
         window.onload = () => {
+            setDefaultDate();
+            updateShiftHours();
+
             if (!window.history.state) {
                 window.history.replaceState({ view: 'view-welcome' }, '', window.location.pathname);
             }
 
-            loadDataFromSheet(); // Tarik data dari Google Sheets
+            loadDataFromSheet();
             
             const urlParams = new URLSearchParams(window.location.search);
             const viewParam = urlParams.get('view');
