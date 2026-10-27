@@ -220,7 +220,7 @@
             .toolbar { flex-direction: column; }
         }
 
-        /* Toast notifikasi (pengganti alert) */
+        /* Toast notifikasi */
         .toast-wrap { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 99999;
                       display: flex; flex-direction: column; gap: 8px; width: min(92vw, 420px); pointer-events: none; }
         .toast { pointer-events: auto; padding: 12px 16px; border-radius: 8px; color: #fff; font-size: 0.9rem;
@@ -372,7 +372,7 @@
                 <div class="form-group">
                     <label>Nama / Nomor Mesin</label>
                     <select id="ctrlMesin">
-                        <!-- Populated dynamically based on Lane -->
+                        <!-- Populated dynamically -->
                     </select>
                 </div>
                 
@@ -460,7 +460,6 @@
                     </div>
                 </div>
 
-                <!-- Print-only container for hourly output PDF export -->
                 <div id="printReportContainer" class="print-only"></div>
 
                 <div style="margin-top: 25px;">
@@ -519,32 +518,33 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxV96ANhPvG-KQfgLmF8Pb7vp4zfMIYiBxCCuBmpBplEfTYZigoKamknGX1xypkh6I0/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDDdMBDexjpAUgsQOcHRRwQdEmWEmSFTJl91I8ykjaXs_f0BJMU5xYiGHJ2EN8Ns7G/exec";
 
         let moldDatabase = {};
-        let moldLoadState = 'loading'; // 'loading' | 'ok' | 'error'
+        let moldLoadState = 'loading';
 
-        // ===== Helper =====
-        // Escape HTML supaya data dari spreadsheet/input tidak bisa menyisipkan tag/script
         function esc(v) {
             return String(v === null || v === undefined ? '' : v).replace(/[&<>"']/g, c => (
                 { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
             ));
         }
 
-        // Format YYYY-MM-DD memakai zona waktu perangkat (bukan UTC)
         function dateToLocalISO(d) {
             const x = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
             return x.toISOString().split('T')[0];
         }
         function todayLocal() { return dateToLocalISO(new Date()); }
 
+        function normJam(j) {
+            if (!j) return '';
+            let s = String(j).trim();
+            if (/^\d:\d\d$/.test(s)) s = '0' + s;
+            return s;
+        }
 
-        // localStorage yang aman (tidak error di mode privat / penyimpanan penuh)
         function safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
         function safeSet(key, val) { try { localStorage.setItem(key, val); } catch (e) { console.warn('localStorage gagal:', e); } }
 
-        // Notifikasi non-blocking pengganti toast()
         function toast(msg, type) {
             if (!type) {
                 if (/berhasil/i.test(msg)) type = 'success';
@@ -567,22 +567,19 @@
             setTimeout(close, type === 'error' ? 5000 : 3500);
         }
 
-        // pushState/replaceState bisa error di iframe terisolasi atau file:// -> jangan sampai merusak aplikasi
-        function safePush(state, url) { try { window.history.pushState(state, '', url); } catch (e) { /* abaikan */ } }
-        function safeReplace(state, url) { try { window.history.replaceState(state, '', url); } catch (e) { /* abaikan */ } }
+        function safePush(state, url) { try { window.history.pushState(state, '', url); } catch (e) {} }
+        function safeReplace(state, url) { try { window.history.replaceState(state, '', url); } catch (e) {} }
 
         function isValidView(id) {
             return typeof id === 'string' && /^view-/.test(id) && id !== 'view-detail' && !!document.getElementById(id);
         }
 
-        // Cegah klik ganda pada tombol simpan mold
         function savingMold(flag) {
             window._savingMold = flag;
             const btn = document.querySelector('#modalTambah .btn-save');
             if (btn) { btn.disabled = flag; btn.style.opacity = flag ? '0.6' : ''; }
         }
 
-        // Mapping mesin berdasarkan Denah Mesin PDF per Lane
         const laneMachines = {
             "Lane 1": [
                 "BOLE 230 EK II", "BLAZE 220 1", "HTF 200 J1", "HTF 200 W9", "HTF 200 W3", 
@@ -788,12 +785,13 @@
             }
         }
 
-        // ===== Laporan Output Per Jam: draf bersama antar-HP (tersimpan per tanggal+shift+mesin+jam) =====
-        const LAPORAN_URL = "https://script.google.com/macros/s/AKfycbxV96ANhPvG-KQfgLmF8Pb7vp4zfMIYiBxCCuBmpBplEfTYZigoKamknGX1xypkh6I0/exec";
+        // ===== Laporan Output Per Jam =====
+        const LAPORAN_URL = "https://script.google.com/macros/s/AKfycbzDDdMBDexjpAUgsQOcHRRwQdEmWEmSFTJl91I8ykjaXs_f0BJMU5xYiGHJ2EN8Ns7G/exec";
         const LJ_FIELDS = { ct: 'ctrlCT', target: 'ctrlTarget', mold: 'ctrlMold', produk: 'ctrlProduk', kondisi: 'ctrlKondisi',
             permasalahan: 'ctrlPermasalahan', selangHidrolik: 'ctrlSelangHidrolik', baut: 'ctrlBaut', hidrolik: 'ctrlHidrolik', limitSwitch: 'ctrlLimitSwitch' };
         let ljRows = {}, ljPending = {}, ljEditAt = {}, ljSync = null, ljSaveTimer = null, ljLastScope = null;
-        const ljKey = (t, s, m, j) => [t, s, m, j].join('|');
+        
+        const ljKey = (t, s, m, j) => [t, s, m, normJam(j)].join('|');
         const ljRecent = k => Date.now() - (ljEditAt[k] || 0) < 15000;
         const ljHH = i => (i < 10 ? '0' + i : '' + i) + ':00';
         const ljHours = shift => shift === 'Sore' ? [17, 23] : shift === 'Malam' ? [1, 7] : [9, 15];
@@ -838,7 +836,6 @@
             window.addEventListener('online', () => ljRefresh());
         }
 
-        // Simpan isi form (milik scope terakhir) ke draf lokal + antrean kirim; hanya baris yang berubah
         function ljSaveNow() {
             clearTimeout(ljSaveTimer);
             const sc = ljLastScope;
@@ -875,7 +872,6 @@
                 .catch(() => ljStatus('Offline - data tersimpan di HP ini dan dikirim otomatis nanti', true));
         }
 
-        // Ambil data terbaru semua HP untuk tanggal+shift yang dipilih
         function ljRefresh() {
             const sc = ljScope();
             if (!sc.tanggal) return Promise.resolve();
@@ -887,7 +883,17 @@
                 if (!d || d.ok !== true || !Array.isArray(d.rows)) { ljSync = false; ljStatus('⚠️ Sinkron antar-HP belum aktif - data hanya ada di HP ini', true); return; }
                 ljSync = true;
                 const remote = {};
-                d.rows.forEach(r => { remote[r.key] = r; });
+                d.rows.forEach(r => { 
+                    if (r.jam) r.jam = normJam(r.jam);
+                    if (r.key) {
+                        const parts = r.key.split('|');
+                        if (parts.length === 4 && parts[3] !== 'META') {
+                            parts[3] = normJam(parts[3]);
+                            r.key = parts.join('|');
+                        }
+                    }
+                    remote[r.key] = r; 
+                });
                 Object.keys(ljRows).forEach(k => {
                     const r = ljRows[k];
                     if (r.tanggal === sc.tanggal && r.shift === sc.shift && !remote[k] && !ljPending[k] && !ljRecent(k)) delete ljRows[k];
@@ -898,7 +904,6 @@
             }).catch(() => { clearTimeout(t); ljStatus('Offline - memakai data tersimpan di HP ini', true); });
         }
 
-        // Isi form dari draf. clear=true: ganti mesin/shift/tanggal (form dikosongkan dulu)
         function ljFill(clear) {
             const sc = ljScope();
             if (clear) {
@@ -921,7 +926,6 @@
             }
         }
 
-        // Susun teks laporan dari SEMUA mesin & jam yang sudah terisi pada tanggal+shift tsb
         function ljBuildReport(tanggal, shift) {
             const order = {}; let n = 0;
             Object.keys(laneMachines).forEach(l => laneMachines[l].forEach(m => { order[m] = n++; }));
@@ -929,7 +933,12 @@
             Object.values(ljRows).forEach(r => {
                 if (r.tanggal !== tanggal || r.shift !== shift) return;
                 const x = by[r.mesin] = by[r.mesin] || { meta: null, jam: {} };
-                if (r.tipe === 'meta') x.meta = r; else x.jam[r.jam] = r;
+                if (r.tipe === 'meta') {
+                    x.meta = r; 
+                } else {
+                    const h = normJam(r.jam);
+                    if (h) x.jam[h] = r;
+                }
             });
             const names = Object.keys(by).sort((p, q) => (order[p] === undefined ? 999 : order[p]) - (order[q] === undefined ? 999 : order[q]));
             if (!names.length) return '';
@@ -943,7 +952,8 @@
                 if (d.kondisi === 'NG') t += `* Permasalahan : ${d.permasalahan || '-'}\n`;
                 t += '\n';
                 for (let i = a; i <= b; i++) {
-                    const h = ljHH(i), r = x.jam[h];
+                    const h = ljHH(i);
+                    const r = x.jam[h] || x.jam[normJam(i + ':00')];
                     t += r && r.pcs ? `${h} : ${r.pcs} pcs${r.note ? ' (' + r.note + ')' : ''}\n` : `${h} :${r && r.note ? ' (' + r.note + ')' : ''}\n`;
                 }
                 t += '\n';
@@ -952,7 +962,7 @@
         }
 
         async function kirimControlKeWA() {
-            const w = window.open('about:blank', '_blank'); // dibuka dulu agar tidak diblokir browser HP
+            const w = window.open('about:blank', '_blank');
             ljSaveNow();
             toast('Mengambil data terbaru dari semua HP...');
             await ljRefresh();
@@ -988,7 +998,6 @@
             document.getElementById(viewId).classList.remove('hidden');
             document.getElementById('sidebarMenu').classList.remove('active');
             document.getElementById('overlay').classList.remove('active');
-            
 
             if (pushHistory) {
                 safePush({ view: viewId }, window.location.pathname + (viewId !== 'view-welcome' ? `?view=${viewId}` : ''));
