@@ -104,7 +104,7 @@
         .stat-red { background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
 
         .quick-actions-title { font-size: 1rem; color: #555; margin-bottom: 15px; font-weight: 600; text-align: center; }
-        .quick-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; max-width: 650px; margin: 0 auto; }
+        .quick-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; max-width: 750px; margin: 0 auto; }
         .btn-action-main, .btn-action-outline {
             padding: 12px 20px; font-size: 0.95rem; border-radius: 8px; cursor: pointer; font-weight: bold;
             display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
@@ -252,6 +252,7 @@
         <a href="#" onclick="showView('view-welcome'); return false;">🏠 Beranda</a>
         <a href="#" onclick="showView('view-home'); return false;">📋 Data Mold</a>
         <a href="#" onclick="showView('view-control'); return false;">⚙️ Laporan Output Per Jam</a>
+        <a href="#" onclick="showView('view-perbaikan'); return false;">🛠️ Perbaikan Mold</a>
     </div>
 
     <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
@@ -327,6 +328,9 @@
                     <button class="btn-action-main" style="background-color: #673ab7;" onclick="showView('view-control')">
                         ⚙️ Laporan Output Per Jam
                     </button>
+                    <button class="btn-action-main" style="background-color: #e65100;" onclick="showView('view-perbaikan')">
+                        🛠️ Perbaikan Mold
+                    </button>
                 </div>
             </div>
         </div>
@@ -342,6 +346,49 @@
             <h2 style="margin-bottom: 15px; color: var(--primary-color); font-size: 1.3rem;">Daftar Asset Mold</h2>
             <div class="mold-grid" id="moldGrid">
                 <div class="empty-state">Memuat data dari Google Sheets...</div>
+            </div>
+        </div>
+
+        <!-- HALAMAN PERBAIKAN MOLD -->
+        <div id="view-perbaikan" class="hidden">
+            <button class="btn-back" onclick="showView('view-welcome')">← Beranda</button>
+            <div class="card">
+                <h2>🛠️ Perbaikan Mold & Tracking Silicone</h2>
+                <p style="color: #666; margin-bottom: 20px;">Pilih menu di bawah untuk menambahkan laporan perbaikan baru atau memantau progres perbaikan yang sedang berjalan.</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                    <!-- Option 1 -->
+                    <div style="background: #fff8f0; border: 2px solid #ff9800; border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 2.5rem; margin-bottom: 10px;">📝</div>
+                            <h3 style="color: #e65100; margin-bottom: 8px;">Tambahkan atau Input Perbaikan</h3>
+                            <p style="font-size: 0.85rem; color: #555; margin-bottom: 15px;">Input data perbaikan mold baru, masalah silikon, tindakan yang diambil, dan estimasi pengerjaan.</p>
+                        </div>
+                        <a href="https://docs.google.com/forms/d/1SfTFQlBj-HDixlmqOikNPF_bh09biLgBwcZM_pinsxs/viewform" target="_blank" class="btn-action-full" style="background-color: #e65100;">
+                            ➕ Buka Form Input Perbaikan
+                        </a>
+                    </div>
+
+                    <!-- Option 2 -->
+                    <div style="background: #f0fdf4; border: 2px solid #22c55e; border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 2.5rem; margin-bottom: 10px;">📊</div>
+                            <h3 style="color: #15803d; margin-bottom: 8px;">Lihat Progres</h3>
+                            <p style="font-size: 0.85rem; color: #555; margin-bottom: 15px;">Pantau daftar dan status progres perbaikan mold yang sedang berlangsung secara real-time.</p>
+                        </div>
+                        <a href="https://docs.google.com/spreadsheets/d/1ltwMqsFPFuqai95dfz2cm0nn9SCPSJk_UwOOwvwPjBw/edit?gid=1482377075#gid=1482377075" target="_blank" class="btn-action-full" style="background-color: #15803d;">
+                            👁️ Buka Sheet Progres Perbaikan
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Preview Progres Live -->
+                <h3 style="font-size: 1rem; color: var(--primary-color); margin-bottom: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                    Pratinjau Progres Perbaikan Mold (Spreadsheet Live):
+                </h3>
+                <div style="width:100%; overflow:hidden; border-radius:8px; border:1px solid var(--border-color);">
+                    <iframe src="https://docs.google.com/spreadsheets/d/1ltwMqsFPFuqai95dfz2cm0nn9SCPSJk_UwOOwvwPjBw/htmlembed?gid=1482377075&widget=true" style="width:100%; height:450px; border:none;"></iframe>
+                </div>
             </div>
         </div>
 
@@ -792,7 +839,6 @@
             permasalahan: 'ctrlPermasalahan', selangHidrolik: 'ctrlSelangHidrolik', baut: 'ctrlBaut', hidrolik: 'ctrlHidrolik', limitSwitch: 'ctrlLimitSwitch' };
         let ljRows = {}, ljPending = {}, ljEditAt = {}, ljSync = null, ljSaveTimer = null, ljLastScope = null;
         
-        // Key unik berdasarkan gabungan (tanggal, shift, mesin, mold, jam)
         const ljKey = (t, s, m, mold, j) => [t, s, m, (mold || '-').trim(), normJam(j)].join('|');
         const ljRecent = k => Date.now() - (ljEditAt[k] || 0) < 15000;
         const ljHH = i => (i < 10 ? '0' + i : '' + i) + ':00';
