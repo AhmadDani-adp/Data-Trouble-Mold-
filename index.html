@@ -519,7 +519,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuCU_SPOUPRXgKa5HDfYRpH1tyQix4V6o3EUbE930EvsrpmPO5OJLAhOAEZrnFfQOp/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxV96ANhPvG-KQfgLmF8Pb7vp4zfMIYiBxCCuBmpBplEfTYZigoKamknGX1xypkh6I0/exec";
 
         let moldDatabase = {};
         let moldLoadState = 'loading'; // 'loading' | 'ok' | 'error'
@@ -788,20 +788,8 @@
             }
         }
 
-
-
-
-
-
-
-
-
-
-
-
         // ===== Laporan Output Per Jam: draf bersama antar-HP (tersimpan per tanggal+shift+mesin+jam) =====
-        // URL Web App Apps Script BARU (spreadsheet khusus laporan per jam). Ganti setelah deploy.
-        const LAPORAN_URL = 'https://script.google.com/macros/s/AKfycbzZpEqlpXuqISRUWwh5eWx-it8bH2xWAy4sBAIw08fFI1YzPU4rUlj0ltspxh2VXbNX/exec';
+        const LAPORAN_URL = "https://script.google.com/macros/s/AKfycbxV96ANhPvG-KQfgLmF8Pb7vp4zfMIYiBxCCuBmpBplEfTYZigoKamknGX1xypkh6I0/exec";
         const LJ_FIELDS = { ct: 'ctrlCT', target: 'ctrlTarget', mold: 'ctrlMold', produk: 'ctrlProduk', kondisi: 'ctrlKondisi',
             permasalahan: 'ctrlPermasalahan', selangHidrolik: 'ctrlSelangHidrolik', baut: 'ctrlBaut', hidrolik: 'ctrlHidrolik', limitSwitch: 'ctrlLimitSwitch' };
         let ljRows = {}, ljPending = {}, ljEditAt = {}, ljSync = null, ljSaveTimer = null, ljLastScope = null;
