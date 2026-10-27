@@ -464,6 +464,7 @@
 
                 <div style="margin-top: 25px;">
                     <p id="syncStatus" style="text-align:center; font-size:0.85rem; margin-bottom:10px; color:#666;"></p>
+                    <button class="btn-action-full" style="background-color: #0284c7; margin-bottom: 10px;" onclick="tambahMoldLain()">➕ Simpan & Input Mold / Mesin Lain</button>
                     <button class="btn-action-full btn-wa" style="width:100%; padding:16px; font-size:1.05rem;" onclick="kirimControlKeWA()">💬 Kirim Laporan ke WhatsApp</button>
                     <button class="btn-action-full btn-pdf" style="width:100%; margin-top:10px; padding:8px; font-size:0.85rem; opacity:.85;" onclick="cetakPDFControl()">🖨️ Cetak PDF</button>
                 </div>
@@ -547,7 +548,7 @@
 
         function toast(msg, type) {
             if (!type) {
-                if (/berhasil/i.test(msg)) type = 'success';
+                if (/berhasil|tersimpan/i.test(msg)) type = 'success';
                 else if (/wajib|belum|tidak ada|tidak boleh|pilih|gagal|kesalahan/i.test(msg)) type = 'error';
             }
             let wrap = document.getElementById('toastWrap');
@@ -791,14 +792,21 @@
             permasalahan: 'ctrlPermasalahan', selangHidrolik: 'ctrlSelangHidrolik', baut: 'ctrlBaut', hidrolik: 'ctrlHidrolik', limitSwitch: 'ctrlLimitSwitch' };
         let ljRows = {}, ljPending = {}, ljEditAt = {}, ljSync = null, ljSaveTimer = null, ljLastScope = null;
         
-        const ljKey = (t, s, m, j) => [t, s, m, normJam(j)].join('|');
+        // Key unik berdasarkan gabungan (tanggal, shift, mesin, mold, jam)
+        const ljKey = (t, s, m, mold, j) => [t, s, m, (mold || '-').trim(), normJam(j)].join('|');
         const ljRecent = k => Date.now() - (ljEditAt[k] || 0) < 15000;
         const ljHH = i => (i < 10 ? '0' + i : '' + i) + ':00';
         const ljHours = shift => shift === 'Sore' ? [17, 23] : shift === 'Malam' ? [1, 7] : [9, 15];
         const ljEl = id => document.getElementById(id);
 
         function ljScope() {
-            return { tanggal: ljEl('ctrlTanggal').value, shift: ljEl('ctrlShift').value, lane: ljEl('ctrlLane').value, mesin: ljEl('ctrlMesin').value };
+            return { 
+                tanggal: ljEl('ctrlTanggal').value, 
+                shift: ljEl('ctrlShift').value, 
+                lane: ljEl('ctrlLane').value, 
+                mesin: ljEl('ctrlMesin').value,
+                mold: ljEl('ctrlMold') ? ljEl('ctrlMold').value.trim() : ''
+            };
         }
         function ljPersist() { safeSet('ljRows', JSON.stringify(ljRows)); safeSet('ljPending', JSON.stringify(ljPending)); }
         function ljStatus(msg, bad) {
@@ -821,9 +829,11 @@
                     if (e.type !== 'change') return;
                     ljSaveNow(); ljFill(true); ljRefresh(); return;
                 }
-                const sc = ljLastScope || ljScope(), m = id.match(/^hour_(?:pcs|note)_(\d+)$/);
-                if (m) ljEditAt[ljKey(sc.tanggal, sc.shift, sc.mesin, ljHH(+m[1]))] = Date.now();
-                else if (fieldIds.includes(id)) ljEditAt[ljKey(sc.tanggal, sc.shift, sc.mesin, 'META')] = Date.now();
+                const sc = ljLastScope || ljScope();
+                const moldVal = sc.mold || ljEl('ctrlMold').value.trim();
+                const m = id.match(/^hour_(?:pcs|note)_(\d+)$/);
+                if (m) ljEditAt[ljKey(sc.tanggal, sc.shift, sc.mesin, moldVal, ljHH(+m[1]))] = Date.now();
+                else if (fieldIds.includes(id)) ljEditAt[ljKey(sc.tanggal, sc.shift, sc.mesin, moldVal, 'META')] = Date.now();
                 else return;
                 clearTimeout(ljSaveTimer);
                 ljSaveTimer = setTimeout(ljSaveNow, 700);
@@ -838,10 +848,13 @@
 
         function ljSaveNow() {
             clearTimeout(ljSaveTimer);
-            const sc = ljLastScope;
+            const sc = ljLastScope || ljScope();
             if (!sc || !sc.mesin) return;
+            const moldVal = (sc.mold || ljEl('ctrlMold').value.trim() || '-');
+            if (!moldVal || moldVal === '-') return;
+
             const v = id => { const el = ljEl(id); return el ? el.value.trim() : null; };
-            const now = Date.now(), base = { tanggal: sc.tanggal, shift: sc.shift, lane: sc.lane, mesin: sc.mesin };
+            const now = Date.now(), base = { tanggal: sc.tanggal, shift: sc.shift, lane: sc.lane, mesin: sc.mesin, mold: moldVal };
             let changed = false;
             const push = (row, k) => {
                 const old = ljRows[k];
@@ -850,10 +863,11 @@
             };
             const meta = {};
             Object.keys(LJ_FIELDS).forEach(f => { meta[f] = v(LJ_FIELDS[f]); });
-            if (meta.mold) push(Object.assign({}, base, { tipe: 'meta', jam: '' }, meta), ljKey(sc.tanggal, sc.shift, sc.mesin, 'META'));
+            push(Object.assign({}, base, { tipe: 'meta', jam: '' }, meta), ljKey(sc.tanggal, sc.shift, sc.mesin, moldVal, 'META'));
+
             const [a, b] = ljHours(sc.shift);
             for (let i = a; i <= b; i++) {
-                const pcs = v('hour_pcs_' + i), note = v('hour_note_' + i), jam = ljHH(i), k = ljKey(sc.tanggal, sc.shift, sc.mesin, jam);
+                const pcs = v('hour_pcs_' + i), note = v('hour_note_' + i), jam = ljHH(i), k = ljKey(sc.tanggal, sc.shift, sc.mesin, moldVal, jam);
                 if (pcs === null) continue;
                 if (pcs || note) push(Object.assign({}, base, { tipe: 'jam', jam, pcs, note }), k);
                 else if (ljRows[k] && ljEditAt[k]) {
@@ -887,7 +901,10 @@
                     if (r.jam) r.jam = normJam(r.jam);
                     if (r.key) {
                         const parts = r.key.split('|');
-                        if (parts.length === 4 && parts[3] !== 'META') {
+                        if (parts.length === 5 && parts[4] !== 'META') {
+                            parts[4] = normJam(parts[4]);
+                            r.key = parts.join('|');
+                        } else if (parts.length === 4 && parts[3] !== 'META') {
                             parts[3] = normJam(parts[3]);
                             r.key = parts.join('|');
                         }
@@ -910,7 +927,8 @@
                 ljLastScope = sc;
                 Object.values(LJ_FIELDS).forEach(id => { const el = ljEl(id); if (el) { if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = ''; } });
             }
-            const mk = ljKey(sc.tanggal, sc.shift, sc.mesin, 'META'), meta = ljRows[mk];
+            const moldVal = sc.mold || '-';
+            const mk = ljKey(sc.tanggal, sc.shift, sc.mesin, moldVal, 'META'), meta = ljRows[mk];
             if (meta && (clear || !ljRecent(mk))) {
                 Object.keys(LJ_FIELDS).forEach(f => { const el = ljEl(LJ_FIELDS[f]); if (el && document.activeElement !== el && meta[f] !== undefined) el.value = meta[f]; });
             }
@@ -918,7 +936,7 @@
             if (meta && meta.kondisi === 'NG' && ljEl('ctrlPermasalahan') && !ljEl('ctrlPermasalahan').value) ljEl('ctrlPermasalahan').value = meta.permasalahan || '';
             const [a, b] = ljHours(sc.shift);
             for (let i = a; i <= b; i++) {
-                const k = ljKey(sc.tanggal, sc.shift, sc.mesin, ljHH(i)), r = ljRows[k];
+                const k = ljKey(sc.tanggal, sc.shift, sc.mesin, moldVal, ljHH(i)), r = ljRows[k];
                 [['hour_pcs_', 'pcs'], ['hour_note_', 'note']].forEach(([p, f]) => {
                     const el = ljEl(p + i);
                     if (el && (clear || (document.activeElement !== el && !ljRecent(k) && !ljPending[k]))) el.value = r ? (r[f] || '') : '';
@@ -932,7 +950,9 @@
             const by = {};
             Object.values(ljRows).forEach(r => {
                 if (r.tanggal !== tanggal || r.shift !== shift) return;
-                const x = by[r.mesin] = by[r.mesin] || { meta: null, jam: {} };
+                const moldName = r.mold || '-';
+                const groupKey = r.mesin + '___' + moldName;
+                const x = by[groupKey] = by[groupKey] || { mesin: r.mesin, mold: moldName, meta: null, jam: {} };
                 if (r.tipe === 'meta') {
                     x.meta = r; 
                 } else {
@@ -940,14 +960,20 @@
                     if (h) x.jam[h] = r;
                 }
             });
-            const names = Object.keys(by).sort((p, q) => (order[p] === undefined ? 999 : order[p]) - (order[q] === undefined ? 999 : order[q]));
-            if (!names.length) return '';
+            const keys = Object.keys(by).sort((a, b) => {
+                const mA = by[a].mesin, mB = by[b].mesin;
+                const posA = order[mA] !== undefined ? order[mA] : 999;
+                const posB = order[mB] !== undefined ? order[mB] : 999;
+                if (posA !== posB) return posA - posB;
+                return by[a].mold.localeCompare(by[b].mold);
+            });
+            if (!keys.length) return '';
             const emoji = shift === 'Sore' ? '🌆' : shift === 'Malam' ? '🌙' : '🌅';
             const [a, b] = ljHours(shift);
             let t = `*Laporan Output Perjam*\n*Tgl ${tanggal}*\n${emoji} *Shift ${shift}*\n\n`;
-            names.forEach((m, idx) => {
-                const x = by[m], d = x.meta || {};
-                t += `${idx + 1}. ${m}\n*${d.mold || '-'}*\n* CT. : ${d.ct || '-'}\n* Target : ${d.target || '-'}\n` +
+            keys.forEach((gKey, idx) => {
+                const x = by[gKey], d = x.meta || {};
+                t += `${idx + 1}. ${x.mesin}\n*${x.mold}*\n* CT. : ${d.ct || '-'}\n* Target : ${d.target || '-'}\n` +
                      `* Selang Hidrolik : ${d.selangHidrolik || '-'}\n* Kondisi Baut : ${d.baut || '-'}\n* Cek LS : ${d.limitSwitch || '-'}\n* Kondisi Produk : ${d.kondisi || '-'}\n`;
                 if (d.kondisi === 'NG') t += `* Permasalahan : ${d.permasalahan || '-'}\n`;
                 t += '\n';
@@ -959,6 +985,27 @@
                 t += '\n';
             });
             return t;
+        }
+
+        function tambahMoldLain() {
+            ljSaveNow();
+            document.getElementById('ctrlMold').value = '';
+            document.getElementById('ctrlProduk').value = '';
+            document.getElementById('ctrlCT').value = '';
+            document.getElementById('ctrlTarget').value = '';
+            document.getElementById('ctrlPermasalahan').value = '';
+            
+            const shift = document.getElementById('ctrlShift').value;
+            const [a, b] = ljHours(shift);
+            for (let i = a; i <= b; i++) {
+                const pcsEl = document.getElementById('hour_pcs_' + i);
+                const noteEl = document.getElementById('hour_note_' + i);
+                if (pcsEl) pcsEl.value = '';
+                if (noteEl) noteEl.value = '';
+            }
+            
+            ljLastScope = ljScope();
+            toast('Data mold sebelumnya tersimpan! Silakan isi data mold berikutnya.', 'success');
         }
 
         async function kirimControlKeWA() {
