@@ -210,7 +210,6 @@
             .card { box-shadow: none; border: none; padding: 0; margin: 0; }
             .container { max-width: 100%; margin: 0; padding: 0; }
             .print-only { display: block !important; font-family: monospace; font-size: 14px; line-height: 1.5; color: #000; }
-            #view-fullday, #view-maintenance-trouble { display: block !important; }
         }
 
         @media (max-width: 600px) {
@@ -220,6 +219,17 @@
             .quick-actions { flex-direction: column; }
             .toolbar { flex-direction: column; }
         }
+
+        /* Toast notifikasi (pengganti alert) */
+        .toast-wrap { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 99999;
+                      display: flex; flex-direction: column; gap: 8px; width: min(92vw, 420px); pointer-events: none; }
+        .toast { pointer-events: auto; padding: 12px 16px; border-radius: 8px; color: #fff; font-size: 0.9rem;
+                 font-weight: 600; box-shadow: 0 6px 18px rgba(0,0,0,0.25); background: #2c3e50; cursor: pointer;
+                 opacity: 0; transform: translateY(-8px); transition: opacity .25s, transform .25s; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast-success { background: var(--success-color); }
+        .toast-error { background: var(--danger-color); }
+        @media print { .toast-wrap { display: none !important; } }
     </style>
 </head>
 <body>
@@ -241,10 +251,7 @@
         <span class="close-btn" onclick="toggleSidebar()">&times;</span>
         <a href="#" onclick="showView('view-welcome'); return false;">🏠 Beranda</a>
         <a href="#" onclick="showView('view-home'); return false;">📋 Data Mold</a>
-        <a href="#" onclick="showView('view-control'); return false;">⚙️ Control Mold Produksi</a>
-        <a href="#" onclick="showView('view-maintenance-trouble'); return false;">🛠️ Laporan Maintenance & Trouble</a>
-        <a href="#" onclick="showView('view-fullday'); return false;">📄 Rekap Full Day (Malam-Sore)</a>
-        <a href="#" onclick="showView('view-maintenance'); return false;">🔧 Data Maintenance & PDF</a>
+        <a href="#" onclick="showView('view-control'); return false;">⚙️ Laporan Output Per Jam</a>
     </div>
 
     <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
@@ -318,10 +325,7 @@
                         🔍 Cari / Daftar Mold
                     </button>
                     <button class="btn-action-main" style="background-color: #673ab7;" onclick="showView('view-control')">
-                        ⚙️ Control Mold
-                    </button>
-                    <button class="btn-action-outline" onclick="showView('view-maintenance-trouble')">
-                        🛠️ Laporan Maintenance & Trouble
+                        ⚙️ Laporan Output Per Jam
                     </button>
                 </div>
             </div>
@@ -341,11 +345,11 @@
             </div>
         </div>
 
-        <!-- HALAMAN CONTROL MOLD PRODUKSI -->
+        <!-- HALAMAN LAPORAN OUTPUT PER JAM -->
         <div id="view-control" class="hidden">
             <button class="btn-back" onclick="showView('view-welcome')">← Beranda</button>
             <div class="card">
-                <h2>Control Mold Produksi</h2>
+                <h2>Laporan Output Per Jam</h2>
                 <p style="color: #666; margin-bottom: 20px;">Form pengecekan operasional mesin, kondisi mold, dan input jumlah produksi per jam berdasarkan shift.</p>
                 
                 <div class="form-group">
@@ -459,122 +463,10 @@
                 <!-- Print-only container for hourly output PDF export -->
                 <div id="printReportContainer" class="print-only"></div>
 
-                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed var(--primary-color); text-align: left; margin-top: 20px;">
-                    <p id="batchCounter" style="margin-bottom: 10px; font-weight: bold; color: var(--primary-color); text-align: center;">Daftar Mesin dalam Batch: 0 Mesin</p>
-                    <div id="batchListContainer" style="margin-bottom: 15px; max-height: 160px; overflow-y: auto;">
-                        <p style="color: #888; font-size: 0.85rem; text-align: center;">Belum ada mesin dalam batch.</p>
-                    </div>
-                    <button type="button" class="btn-action-full" style="background-color: #17a2b8;" onclick="tambahMesinKeBatch()">➕ Tambah Mesin Ini ke Daftar Batch</button>
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 25px; flex-wrap: wrap;">
-                    <button class="btn-action-full btn-save" style="flex: 1;" onclick="simpanControlMold()">📊 Simpan ke Spreadsheet</button>
-                    <button class="btn-action-full btn-pdf" style="flex: 1;" onclick="cetakPDFControl()">🖨️ Cetak PDF</button>
-                    <button class="btn-action-full btn-wa" style="flex: 1;" onclick="kirimControlKeWA()">💬 Kirim ke WhatsApp</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- HALAMAN LAPORAN MAINTENANCE & TROUBLE -->
-        <div id="view-maintenance-trouble" class="hidden">
-            <button class="btn-back" onclick="showView('view-welcome')">← Beranda</button>
-            <div class="card">
-                <h2>Laporan Maintenance & Trouble Harian</h2>
-                <p style="color: #666; margin-bottom: 20px;">Catat log aktivitas perbaikan, trouble, dan status pemeliharaan mold secara terstruktur.</p>
-
-                <div class="form-group">
-                    <label>Tanggal Log</label>
-                    <input type="date" id="maintTanggal">
-                </div>
-                <div class="form-group">
-                    <label>Shift</label>
-                    <select id="maintShift">
-                        <option value="Pagi">🌅 Pagi</option>
-                        <option value="Sore">🌆 Sore</option>
-                        <option value="Malam">🌙 Malam</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Nama / ID Mold</label>
-                    <input type="text" id="maintMold" placeholder="Contoh: Pintu 31 Flat">
-                </div>
-                <div class="form-group">
-                    <label>Nama Mesin</label>
-                    <input type="text" id="maintMesin" placeholder="Contoh: Mesin 02">
-                </div>
-                <div class="form-group">
-                    <label>Kendala / Jenis Trouble</label>
-                    <input type="text" id="maintTrouble" placeholder="Contoh: Core A Out error / Ejektor seret">
-                </div>
-                <div class="form-group">
-                    <label>Tindakan Perbaikan</label>
-                    <input type="text" id="maintTindakan" placeholder="Contoh: Kencangkan tuas L'S / Lumasi ejektor">
-                </div>
-                <div class="form-group">
-                    <label>Waktu Pengerjaan (Jam)</label>
-                    <input type="text" id="maintWaktu" placeholder="Contoh: 08:33 - 08:36">
-                </div>
-                <div class="form-group">
-                    <label>Status / Hasil</label>
-                    <select id="maintStatus">
-                        <option value="✅ Selesai / Normal">✅ Selesai / Normal</option>
-                        <option value="🔄 Lanjut Finishing">🔄 Lanjut Finishing</option>
-                        <option value="⚠️ Pending / Cek Ulang">⚠️ Pending / Cek Ulang</option>
-                    </select>
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 25px; flex-wrap: wrap;">
-                    <button class="btn-action-full btn-save" style="flex: 1;" onclick="simpanMaintenanceLog()">Simpan Log Maintenance</button>
-                    <button class="btn-action-full btn-wa" style="flex: 1;" onclick="kirimMaintenanceKeWA()">📤 Kirim Semua ke WhatsApp</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>Riwayat Log Maintenance Tersimpan</h2>
-                <div id="maintenanceLogContent" style="overflow-x: auto;">
-                    <p style="color: #888; text-align: center; padding: 10px;">Belum ada log maintenance tercatat.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- HALAMAN REKAP FULL DAY (MALAM - SORE) PDF -->
-        <div id="view-fullday" class="hidden">
-            <button class="btn-back" onclick="showView('view-welcome')">← Beranda</button>
-            <div class="card">
-                <h2>Rekap Laporan Full Day (Malam s.d Sore)</h2>
-                <p style="color: #666; margin-bottom: 15px;">Gabungan seluruh shift dalam satu siklus harian lengkap (Shift Malam ➔ Pagi ➔ Sore) siap dicetak ke PDF.</p>
-                
-                <div class="form-group" style="max-width: 300px;">
-                    <label>Pilih Tanggal Rekap</label>
-                    <input type="date" id="filterTanggal" onchange="renderFullDayTable()">
-                </div>
-
-                <div id="fullDayContent" style="margin-top: 20px; overflow-x: auto;">
-                    <p style="color: #888; text-align: center; padding: 20px;">Silakan pilih tanggal untuk melihat rekapitulasi data.</p>
-                </div>
-
-                <div style="margin-top: 20px;">
-                    <button onclick="window.print()" class="btn-action-full btn-pdf">
-                        🖨️ Cetak / Simpan Rekap Full Day ke PDF
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- HALAMAN MAINTENANCE & PDF -->
-        <div id="view-maintenance" class="hidden">
-            <button class="btn-back" onclick="showView('view-welcome')">← Beranda</button>
-            <div class="card">
-                <h2>Rekap Data & Cetak Laporan PDF</h2>
-                <p style="color: #666; margin-bottom: 20px;">Cetak laporan rekapitulasi maintenance langsung ke format PDF atau buka spreadsheet master.</p>
-                
-                <div class="action-buttons">
-                    <button onclick="window.print()" class="btn-action-full btn-pdf">
-                        🖨️ Cetak / Simpan Laporan ke PDF
-                    </button>
-                    <a id="btnMasterSheet" href="https://docs.google.com/spreadsheets/d/12N7J-DbGInr_h_alEdMwsmmLRSGl7CNqn-oLI_sLHUQ/edit" target="_blank" class="btn-action-full btn-sheet">
-                        📊 Buka Master Data (Google Sheets)
-                    </a>
+                <div style="margin-top: 25px;">
+                    <p id="syncStatus" style="text-align:center; font-size:0.85rem; margin-bottom:10px; color:#666;"></p>
+                    <button class="btn-action-full btn-wa" style="width:100%; padding:16px; font-size:1.05rem;" onclick="kirimControlKeWA()">💬 Kirim Laporan ke WhatsApp</button>
+                    <button class="btn-action-full btn-pdf" style="width:100%; margin-top:10px; padding:8px; font-size:0.85rem; opacity:.85;" onclick="cetakPDFControl()">🖨️ Cetak PDF</button>
                 </div>
             </div>
         </div>
@@ -630,11 +522,67 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuCU_SPOUPRXgKa5HDfYRpH1tyQix4V6o3EUbE930EvsrpmPO5OJLAhOAEZrnFfQOp/exec";
 
         let moldDatabase = {};
-        let allControlRecords = [];
-        let allMaintenanceLogs = [];
-        let currentBatchMachines = [];
+        let moldLoadState = 'loading'; // 'loading' | 'ok' | 'error'
 
-        // Mapping mesin berdasarkan Denah Mesin PDF per Lane[cite: 1]
+        // ===== Helper =====
+        // Escape HTML supaya data dari spreadsheet/input tidak bisa menyisipkan tag/script
+        function esc(v) {
+            return String(v === null || v === undefined ? '' : v).replace(/[&<>"']/g, c => (
+                { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+            ));
+        }
+
+        // Format YYYY-MM-DD memakai zona waktu perangkat (bukan UTC)
+        function dateToLocalISO(d) {
+            const x = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+            return x.toISOString().split('T')[0];
+        }
+        function todayLocal() { return dateToLocalISO(new Date()); }
+
+
+        // localStorage yang aman (tidak error di mode privat / penyimpanan penuh)
+        function safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+        function safeSet(key, val) { try { localStorage.setItem(key, val); } catch (e) { console.warn('localStorage gagal:', e); } }
+
+        // Notifikasi non-blocking pengganti toast()
+        function toast(msg, type) {
+            if (!type) {
+                if (/berhasil/i.test(msg)) type = 'success';
+                else if (/wajib|belum|tidak ada|tidak boleh|pilih|gagal|kesalahan/i.test(msg)) type = 'error';
+            }
+            let wrap = document.getElementById('toastWrap');
+            if (!wrap) {
+                wrap = document.createElement('div');
+                wrap.id = 'toastWrap';
+                wrap.className = 'toast-wrap';
+                document.body.appendChild(wrap);
+            }
+            const el = document.createElement('div');
+            el.className = 'toast' + (type ? ' toast-' + type : '');
+            el.textContent = msg;
+            const close = () => { el.classList.remove('show'); setTimeout(() => el.remove(), 250); };
+            el.onclick = close;
+            wrap.appendChild(el);
+            requestAnimationFrame(() => el.classList.add('show'));
+            setTimeout(close, type === 'error' ? 5000 : 3500);
+        }
+
+        // pushState/replaceState bisa error di iframe terisolasi atau file:// -> jangan sampai merusak aplikasi
+        function safePush(state, url) { try { window.history.pushState(state, '', url); } catch (e) { /* abaikan */ } }
+        function safeReplace(state, url) { try { window.history.replaceState(state, '', url); } catch (e) { /* abaikan */ } }
+
+        function isValidView(id) {
+            return typeof id === 'string' && /^view-/.test(id) && id !== 'view-detail' && !!document.getElementById(id);
+        }
+
+        // Cegah klik ganda pada tombol simpan mold
+        function savingMold(flag) {
+            window._savingMold = flag;
+            const btn = document.querySelector('#modalTambah .btn-save');
+            if (btn) { btn.disabled = flag; btn.style.opacity = flag ? '0.6' : ''; }
+        }
+
+        // Mapping mesin berdasarkan Denah Mesin PDF per Lane
         const laneMachines = {
             "Lane 1": [
                 "BOLE 230 EK II", "BLAZE 220 1", "HTF 200 J1", "HTF 200 W9", "HTF 200 W3", 
@@ -686,13 +634,9 @@
         }
 
         function setDefaultDate() {
-            const today = new Date().toISOString().split('T')[0];
+            const today = todayLocal();
             const dateInput = document.getElementById('ctrlTanggal');
             if (dateInput) dateInput.value = today;
-            const filterDate = document.getElementById('filterTanggal');
-            if (filterDate) filterDate.value = today;
-            const maintDate = document.getElementById('maintTanggal');
-            if (maintDate) maintDate.value = today;
 
             updateLaneMachines();
         }
@@ -727,24 +671,21 @@
         }
 
         function loadDataFromSheet() {
-            const savedLocal = localStorage.getItem('localControlRecords');
-            if (savedLocal) {
-                try {
-                    allControlRecords = JSON.parse(savedLocal);
-                } catch(e) { allControlRecords = []; }
+            if (Object.keys(moldDatabase).length === 0) {
+                document.getElementById('moldGrid').innerHTML = '<div class="empty-state">Memuat data...</div>';
             }
 
-            const savedMaint = localStorage.getItem('localMaintenanceLogs');
-            if (savedMaint) {
-                try {
-                    allMaintenanceLogs = JSON.parse(savedMaint);
-                } catch(e) { allMaintenanceLogs = []; }
-            }
-            renderMaintenanceLogs();
-
-            fetch(SCRIPT_URL)
-                .then(res => res.json())
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 20000);
+            fetch(SCRIPT_URL, { signal: ctrl.signal })
+                .then(res => {
+                    clearTimeout(timer);
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
                 .then(data => {
+                    if (!Array.isArray(data)) throw new Error('Format data tidak valid');
+                    moldLoadState = 'ok';
                     moldDatabase = {};
                     data.forEach(row => {
                         let id = row.mold || row.id;
@@ -776,15 +717,8 @@
                                 }
                             };
                         }
-                        if (row.action === 'controlProduksi' || row.shift) {
-                            const exists = allControlRecords.some(item => item.tanggal === row.tanggal && item.shift === row.shift && item.mesin === row.mesin);
-                            if (!exists) {
-                                allControlRecords.push(row);
-                            }
-                        }
                     });
                     renderMoldGrid();
-                    renderFullDayTable();
                     
                     const urlParams = new URLSearchParams(window.location.search);
                     const moldId = urlParams.get('id');
@@ -793,9 +727,11 @@
                     }
                 })
                 .catch(err => {
-                    console.log("Menggunakan data lokal offline.");
+                    console.log("Menggunakan data lokal offline.", err);
+                    clearTimeout(timer);
+                    moldLoadState = 'error';
+                    toast("Gagal memuat data dari spreadsheet. Menggunakan data lokal.", "error");
                     renderMoldGrid();
-                    renderFullDayTable();
                 });
         }
 
@@ -809,8 +745,9 @@
         }
 
         function simpanMold() {
+            if (window._savingMold) return;
             const id = document.getElementById('inputID').value.trim();
-            if(!id) { alert("ID/No Mold tidak boleh kosong!"); return; }
+            if(!id) { toast("ID/No Mold tidak boleh kosong!"); return; }
 
             const newData = {
                 id: id,
@@ -821,17 +758,21 @@
                 status: document.getElementById('inputStatus').value
             };
 
+            savingMold(true);
+
             fetch(SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify(newData)
             }).then(() => {
-                alert("Data berhasil disimpan ke Spreadsheet!");
+                savingMold(false);
+                toast("Data berhasil disimpan ke Spreadsheet!");
                 closeModal();
                 setTimeout(loadDataFromSheet, 1500);
             }).catch(err => {
-                alert("Terjadi kesalahan saat menyimpan.");
+                savingMold(false);
+                toast("Terjadi kesalahan saat menyimpan.");
                 console.error(err);
             });
         }
@@ -847,474 +788,198 @@
             }
         }
 
-        function getHourlyData() {
-            let hourlyObj = {};
-            const shift = document.getElementById('ctrlShift').value;
-            let start = 9, end = 15;
-            if (shift === 'Sore') { start = 17; end = 23; }
-            else if (shift === 'Malam') { start = 1; end = 7; }
 
-            for (let i = start; i <= end; i++) {
-                let hourStr = i < 10 ? `0${i}:00` : `${i}:00`;
-                const pcsEl = document.getElementById(`hour_pcs_${i}`);
-                const noteEl = document.getElementById(`hour_note_${i}`);
-                if (pcsEl && pcsEl.value) {
-                    hourlyObj[hourStr] = {
-                        pcs: pcsEl.value,
-                        note: noteEl ? noteEl.value.trim() : ''
-                    };
+
+
+
+
+
+
+
+
+
+
+        // ===== Laporan Output Per Jam: draf bersama antar-HP (tersimpan per tanggal+shift+mesin+jam) =====
+        // URL Web App Apps Script BARU (spreadsheet khusus laporan per jam). Ganti setelah deploy.
+        const LAPORAN_URL = 'https://script.google.com/macros/s/AKfycbzZpEqlpXuqISRUWwh5eWx-it8bH2xWAy4sBAIw08fFI1YzPU4rUlj0ltspxh2VXbNX/exec';
+        const LJ_FIELDS = { ct: 'ctrlCT', target: 'ctrlTarget', mold: 'ctrlMold', produk: 'ctrlProduk', kondisi: 'ctrlKondisi',
+            permasalahan: 'ctrlPermasalahan', selangHidrolik: 'ctrlSelangHidrolik', baut: 'ctrlBaut', hidrolik: 'ctrlHidrolik', limitSwitch: 'ctrlLimitSwitch' };
+        let ljRows = {}, ljPending = {}, ljEditAt = {}, ljSync = null, ljSaveTimer = null, ljLastScope = null;
+        const ljKey = (t, s, m, j) => [t, s, m, j].join('|');
+        const ljRecent = k => Date.now() - (ljEditAt[k] || 0) < 15000;
+        const ljHH = i => (i < 10 ? '0' + i : '' + i) + ':00';
+        const ljHours = shift => shift === 'Sore' ? [17, 23] : shift === 'Malam' ? [1, 7] : [9, 15];
+        const ljEl = id => document.getElementById(id);
+
+        function ljScope() {
+            return { tanggal: ljEl('ctrlTanggal').value, shift: ljEl('ctrlShift').value, lane: ljEl('ctrlLane').value, mesin: ljEl('ctrlMesin').value };
+        }
+        function ljPersist() { safeSet('ljRows', JSON.stringify(ljRows)); safeSet('ljPending', JSON.stringify(ljPending)); }
+        function ljStatus(msg, bad) {
+            const el = ljEl('syncStatus');
+            if (el) { el.textContent = msg; el.style.color = bad ? '#b45309' : '#15803d'; }
+        }
+
+        function ljInit() {
+            try { ljRows = JSON.parse(safeGet('ljRows') || '{}') || {}; ljPending = JSON.parse(safeGet('ljPending') || '{}') || {}; }
+            catch (e) { ljRows = {}; ljPending = {}; }
+            const d = new Date(); d.setDate(d.getDate() - 3);
+            const min = dateToLocalISO(d);
+            Object.keys(ljRows).forEach(k => { if (!ljRows[k] || ljRows[k].tanggal < min) { delete ljRows[k]; delete ljPending[k]; } });
+            const view = ljEl('view-control');
+            const scopeIds = ['ctrlTanggal', 'ctrlLane', 'ctrlMesin', 'ctrlShift'];
+            const fieldIds = Object.values(LJ_FIELDS);
+            const onEdit = e => {
+                const id = e.target.id || '';
+                if (scopeIds.includes(id)) {
+                    if (e.type !== 'change') return;
+                    ljSaveNow(); ljFill(true); ljRefresh(); return;
+                }
+                const sc = ljLastScope || ljScope(), m = id.match(/^hour_(?:pcs|note)_(\d+)$/);
+                if (m) ljEditAt[ljKey(sc.tanggal, sc.shift, sc.mesin, ljHH(+m[1]))] = Date.now();
+                else if (fieldIds.includes(id)) ljEditAt[ljKey(sc.tanggal, sc.shift, sc.mesin, 'META')] = Date.now();
+                else return;
+                clearTimeout(ljSaveTimer);
+                ljSaveTimer = setTimeout(ljSaveNow, 700);
+            };
+            view.addEventListener('input', onEdit);
+            view.addEventListener('change', onEdit);
+            ljFill(true);
+            ljStatus('Memeriksa sinkronisasi...');
+            setInterval(() => { if (!document.hidden && !view.classList.contains('hidden')) ljRefresh(); else ljFlush(); }, 20000);
+            window.addEventListener('online', () => ljRefresh());
+        }
+
+        // Simpan isi form (milik scope terakhir) ke draf lokal + antrean kirim; hanya baris yang berubah
+        function ljSaveNow() {
+            clearTimeout(ljSaveTimer);
+            const sc = ljLastScope;
+            if (!sc || !sc.mesin) return;
+            const v = id => { const el = ljEl(id); return el ? el.value.trim() : null; };
+            const now = Date.now(), base = { tanggal: sc.tanggal, shift: sc.shift, lane: sc.lane, mesin: sc.mesin };
+            let changed = false;
+            const push = (row, k) => {
+                const old = ljRows[k];
+                if (old && Object.keys(row).every(f => String(old[f] === undefined ? '' : old[f]) === String(row[f] === undefined ? '' : row[f]))) return;
+                row.key = k; row.updatedAt = now; ljRows[k] = row; ljPending[k] = row; changed = true;
+            };
+            const meta = {};
+            Object.keys(LJ_FIELDS).forEach(f => { meta[f] = v(LJ_FIELDS[f]); });
+            if (meta.mold) push(Object.assign({}, base, { tipe: 'meta', jam: '' }, meta), ljKey(sc.tanggal, sc.shift, sc.mesin, 'META'));
+            const [a, b] = ljHours(sc.shift);
+            for (let i = a; i <= b; i++) {
+                const pcs = v('hour_pcs_' + i), note = v('hour_note_' + i), jam = ljHH(i), k = ljKey(sc.tanggal, sc.shift, sc.mesin, jam);
+                if (pcs === null) continue;
+                if (pcs || note) push(Object.assign({}, base, { tipe: 'jam', jam, pcs, note }), k);
+                else if (ljRows[k] && ljEditAt[k]) {
+                    delete ljRows[k]; ljPending[k] = Object.assign({}, base, { key: k, tipe: 'jam', jam, hapus: true, updatedAt: now }); changed = true;
                 }
             }
-            return hourlyObj;
+            if (changed) { ljPersist(); ljFlush(); }
         }
 
-        function renderBatchList() {
-            const container = document.getElementById('batchListContainer');
-            document.getElementById('batchCounter').innerText = `Daftar Mesin dalam Batch: ${currentBatchMachines.length} Mesin`;
-            
-            if (currentBatchMachines.length === 0) {
-                container.innerHTML = `<p style="color: #888; font-size: 0.85rem; text-align: center;">Belum ada mesin dalam batch.</p>`;
-                return;
-            }
-
-            let html = `<ul style="list-style-type: none; padding: 0; font-size: 0.85rem;">`;
-            currentBatchMachines.forEach((item, index) => {
-                html += `<li style="background: white; padding: 6px 10px; margin-bottom: 5px; border-radius: 4px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-                    <span><strong>${index + 1}. ${item.mesin}</strong> (${item.mold} - ${item.kondisi})</span>
-                    <button type="button" onclick="hapusDariBatch(${index})" style="background: #dc3545; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; font-size: 0.75rem;">Hapus</button>
-                </li>`;
-            });
-            html += `</ul>`;
-            container.innerHTML = html;
+        function ljFlush() {
+            if (!ljSync) return;
+            const sent = Object.assign({}, ljPending), rows = Object.values(sent);
+            if (!rows.length) return;
+            fetch(LAPORAN_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'laporanJam', rows }) })
+                .then(() => { Object.keys(sent).forEach(k => { if (ljPending[k] === sent[k]) delete ljPending[k]; }); ljPersist(); })
+                .catch(() => ljStatus('Offline - data tersimpan di HP ini dan dikirim otomatis nanti', true));
         }
 
-        function hapusDariBatch(index) {
-            currentBatchMachines.splice(index, 1);
-            renderBatchList();
-        }
-
-        function tambahMesinKeBatch() {
-            const tanggal = document.getElementById('ctrlTanggal').value;
-            const mesin = document.getElementById('ctrlMesin').value.trim();
-            const lane = document.getElementById('ctrlLane').value;
-            const shift = document.getElementById('ctrlShift').value;
-            const ct = document.getElementById('ctrlCT').value.trim();
-            const target = document.getElementById('ctrlTarget').value.trim();
-            const mold = document.getElementById('ctrlMold').value.trim();
-            const produk = document.getElementById('ctrlProduk').value.trim();
-            const kondisi = document.getElementById('ctrlKondisi').value;
-            const permasalahan = document.getElementById('ctrlPermasalahan').value.trim();
-            const selangHidrolik = document.getElementById('ctrlSelangHidrolik').value;
-            const baut = document.getElementById('ctrlBaut').value;
-            const hidrolik = document.getElementById('ctrlHidrolik').value;
-            const limitSwitch = document.getElementById('ctrlLimitSwitch').value;
-            const hourlyData = getHourlyData();
-
-            if (!mesin || !mold || !tanggal) {
-                alert("Tanggal, Nama Mesin, dan ID/Nama Mold wajib diisi!");
-                return;
-            }
-
-            if (kondisi === 'NG' && !permasalahan) {
-                alert("Karena kondisi produk NG, Jenis Permasalahan wajib diisi!");
-                return;
-            }
-
-            const payload = {
-                action: 'controlProduksi',
-                tanggal: tanggal,
-                mesin: mesin,
-                lane: lane,
-                shift: shift,
-                ct: ct || "-",
-                target: target || "-",
-                mold: mold,
-                produk: produk,
-                kondisi: kondisi,
-                permasalahan: kondisi === 'NG' ? permasalahan : '-',
-                selangHidrolik: selangHidrolik,
-                baut: baut,
-                hidrolik: hidrolik,
-                limitSwitch: limitSwitch,
-                hourlyProduction: hourlyData,
-                jamInput: new Date().toLocaleTimeString()
-            };
-
-            currentBatchMachines.push(payload);
-            renderBatchList();
-            alert(`Mesin ${mesin} (${mold}) berhasil ditambahkan ke antrean batch! Silakan isi mesin berikutnya.`);
-
-            // Reset field mesin tertentu untuk input berikutnya
-            document.getElementById('ctrlCT').value = '';
-            document.getElementById('ctrlTarget').value = '';
-            document.getElementById('ctrlMold').value = '';
-            document.getElementById('ctrlProduk').value = '';
-            document.getElementById('ctrlKondisi').value = 'OK';
-            togglePermasalahan();
-            const pcsInputs = document.querySelectorAll('.hourly-item input[type="number"]');
-            pcsInputs.forEach(inp => inp.value = '');
-            const noteInputs = document.querySelectorAll('.hourly-item input[type="text"]');
-            noteInputs.forEach(inp => inp.value = '');
-        }
-
-        function simpanControlMold() {
-            const mesin = document.getElementById('ctrlMesin').value.trim();
-            const mold = document.getElementById('ctrlMold').value.trim();
-            if (mesin && mold) {
-                tambahMesinKeBatch();
-            }
-
-            if (currentBatchMachines.length === 0) {
-                alert("Belum ada data mesin yang diinput dalam batch!");
-                return;
-            }
-
-            currentBatchMachines.forEach(payload => {
-                allControlRecords.push(payload);
-                fetch(SCRIPT_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify(payload)
+        // Ambil data terbaru semua HP untuk tanggal+shift yang dipilih
+        function ljRefresh() {
+            const sc = ljScope();
+            if (!sc.tanggal) return Promise.resolve();
+            if (!/^https:\/\//.test(LAPORAN_URL)) { ljSync = false; ljStatus('⚠️ Spreadsheet laporan belum diatur - data hanya ada di HP ini', true); return Promise.resolve(); }
+            const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 10000);
+            const url = `${LAPORAN_URL}?action=laporanJam&tanggal=${encodeURIComponent(sc.tanggal)}&shift=${encodeURIComponent(sc.shift)}&_=${Date.now()}`;
+            return fetch(url, { signal: ctrl.signal }).then(r => r.json()).then(d => {
+                clearTimeout(t);
+                if (!d || d.ok !== true || !Array.isArray(d.rows)) { ljSync = false; ljStatus('⚠️ Sinkron antar-HP belum aktif - data hanya ada di HP ini', true); return; }
+                ljSync = true;
+                const remote = {};
+                d.rows.forEach(r => { remote[r.key] = r; });
+                Object.keys(ljRows).forEach(k => {
+                    const r = ljRows[k];
+                    if (r.tanggal === sc.tanggal && r.shift === sc.shift && !remote[k] && !ljPending[k] && !ljRecent(k)) delete ljRows[k];
                 });
-            });
+                Object.keys(remote).forEach(k => { if (!ljPending[k] && !ljRecent(k)) ljRows[k] = remote[k]; });
+                ljPersist(); ljFill(false); ljFlush();
+                ljStatus('✅ Tersinkron ' + new Date().toTimeString().slice(0, 5));
+            }).catch(() => { clearTimeout(t); ljStatus('Offline - memakai data tersimpan di HP ini', true); });
+        }
 
-            localStorage.setItem('localControlRecords', JSON.stringify(allControlRecords));
-            alert("Seluruh data Control Mold Produksi dalam batch berhasil disimpan ke Spreadsheet!");
-            currentBatchMachines = [];
-            renderBatchList();
-            showView('view-fullday');
+        // Isi form dari draf. clear=true: ganti mesin/shift/tanggal (form dikosongkan dulu)
+        function ljFill(clear) {
+            const sc = ljScope();
+            if (clear) {
+                ljLastScope = sc;
+                Object.values(LJ_FIELDS).forEach(id => { const el = ljEl(id); if (el) { if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = ''; } });
+            }
+            const mk = ljKey(sc.tanggal, sc.shift, sc.mesin, 'META'), meta = ljRows[mk];
+            if (meta && (clear || !ljRecent(mk))) {
+                Object.keys(LJ_FIELDS).forEach(f => { const el = ljEl(LJ_FIELDS[f]); if (el && document.activeElement !== el && meta[f] !== undefined) el.value = meta[f]; });
+            }
+            togglePermasalahan();
+            if (meta && meta.kondisi === 'NG' && ljEl('ctrlPermasalahan') && !ljEl('ctrlPermasalahan').value) ljEl('ctrlPermasalahan').value = meta.permasalahan || '';
+            const [a, b] = ljHours(sc.shift);
+            for (let i = a; i <= b; i++) {
+                const k = ljKey(sc.tanggal, sc.shift, sc.mesin, ljHH(i)), r = ljRows[k];
+                [['hour_pcs_', 'pcs'], ['hour_note_', 'note']].forEach(([p, f]) => {
+                    const el = ljEl(p + i);
+                    if (el && (clear || (document.activeElement !== el && !ljRecent(k) && !ljPending[k]))) el.value = r ? (r[f] || '') : '';
+                });
+            }
+        }
+
+        // Susun teks laporan dari SEMUA mesin & jam yang sudah terisi pada tanggal+shift tsb
+        function ljBuildReport(tanggal, shift) {
+            const order = {}; let n = 0;
+            Object.keys(laneMachines).forEach(l => laneMachines[l].forEach(m => { order[m] = n++; }));
+            const by = {};
+            Object.values(ljRows).forEach(r => {
+                if (r.tanggal !== tanggal || r.shift !== shift) return;
+                const x = by[r.mesin] = by[r.mesin] || { meta: null, jam: {} };
+                if (r.tipe === 'meta') x.meta = r; else x.jam[r.jam] = r;
+            });
+            const names = Object.keys(by).sort((p, q) => (order[p] === undefined ? 999 : order[p]) - (order[q] === undefined ? 999 : order[q]));
+            if (!names.length) return '';
+            const emoji = shift === 'Sore' ? '🌆' : shift === 'Malam' ? '🌙' : '🌅';
+            const [a, b] = ljHours(shift);
+            let t = `*Laporan Output Perjam*\n*Tgl ${tanggal}*\n${emoji} *Shift ${shift}*\n\n`;
+            names.forEach((m, idx) => {
+                const x = by[m], d = x.meta || {};
+                t += `${idx + 1}. ${m}\n*${d.mold || '-'}*\n* CT. : ${d.ct || '-'}\n* Target : ${d.target || '-'}\n` +
+                     `* Selang Hidrolik : ${d.selangHidrolik || '-'}\n* Kondisi Baut : ${d.baut || '-'}\n* Cek LS : ${d.limitSwitch || '-'}\n* Kondisi Produk : ${d.kondisi || '-'}\n`;
+                if (d.kondisi === 'NG') t += `* Permasalahan : ${d.permasalahan || '-'}\n`;
+                t += '\n';
+                for (let i = a; i <= b; i++) {
+                    const h = ljHH(i), r = x.jam[h];
+                    t += r && r.pcs ? `${h} : ${r.pcs} pcs${r.note ? ' (' + r.note + ')' : ''}\n` : `${h} :${r && r.note ? ' (' + r.note + ')' : ''}\n`;
+                }
+                t += '\n';
+            });
+            return t;
+        }
+
+        async function kirimControlKeWA() {
+            const w = window.open('about:blank', '_blank'); // dibuka dulu agar tidak diblokir browser HP
+            ljSaveNow();
+            toast('Mengambil data terbaru dari semua HP...');
+            await ljRefresh();
+            const sc = ljScope(), txt = ljBuildReport(sc.tanggal, sc.shift);
+            if (!txt) { if (w) w.close(); toast('Belum ada data jam yang diisi untuk shift ini!'); return; }
+            const url = 'https://wa.me/?text=' + encodeURIComponent(txt);
+            if (w) w.location.href = url; else window.location.href = url;
         }
 
         function cetakPDFControl() {
-            const tanggal = document.getElementById('ctrlTanggal').value;
-            const shift = document.getElementById('ctrlShift').value;
-
-            let shiftEmoji = "🌅";
-            if (shift === 'Sore') shiftEmoji = "🌆";
-            if (shift === 'Malam') shiftEmoji = "🌙";
-
-            let targetList = [...currentBatchMachines];
-            const mesin = document.getElementById('ctrlMesin').value.trim();
-            const mold = document.getElementById('ctrlMold').value.trim();
-            if (mesin && mold) {
-                const ct = document.getElementById('ctrlCT').value.trim();
-                const target = document.getElementById('ctrlTarget').value.trim();
-                const produk = document.getElementById('ctrlProduk').value.trim();
-                const kondisi = document.getElementById('ctrlKondisi').value;
-                const permasalahan = document.getElementById('ctrlPermasalahan').value.trim();
-                const selangHidrolik = document.getElementById('ctrlSelangHidrolik').value;
-                const baut = document.getElementById('ctrlBaut').value;
-                const limitSwitch = document.getElementById('ctrlLimitSwitch').value;
-                const hourlyData = getHourlyData();
-                targetList.push({ mesin, mold, ct, target, produk, kondisi, permasalahan, selangHidrolik, baut, limitSwitch, hourlyProduction: hourlyData });
-            }
-
-            if (targetList.length === 0) {
-                alert("Belum ada data mesin untuk dicetak!");
-                return;
-            }
-
-            let html = `*Laporan Output Perjam (Multi-Mesin)*\n` +
-                        `*Tgl ${tanggal}*\n` +
-                        `${shiftEmoji} *Shift ${shift}*\n\n`;
-
-            targetList.forEach((item, idx) => {
-                html += `${idx + 1}. ${item.mesin}\n` +
-                        `*${item.mold}*\n` +
-                        `* CT. : ${item.ct || "-"}\n` +
-                        `* Target : ${item.target || "-"}\n` +
-                        `* Selang Hidrolik : ${item.selangHidrolik}\n` +
-                        `* Kondisi Baut : ${item.baut || "-"}\n` +
-                        `* Cek LS : ${item.limitSwitch || "-"}\n` +
-                        `* Kondisi Produk : ${item.kondisi}\n`;
-                if (item.kondisi === 'NG') {
-                    html += `* Permasalahan : ${item.permasalahan}\n`;
-                }
-                html += `\n`;
-
-                const shiftType = shift;
-                let start = 9, end = 15;
-                if (shiftType === 'Sore') { start = 17; end = 23; }
-                else if (shiftType === 'Malam') { start = 1; end = 7; }
-
-                let hObj = typeof item.hourlyProduction === 'string' ? JSON.parse(item.hourlyProduction) : item.hourlyProduction;
-                for (let i = start; i <= end; i++) {
-                    let hourStr = i < 10 ? `0${i}:00` : `${i}:00`;
-                    let hData = hObj ? hObj[hourStr] : null;
-                    if (hData) {
-                        let pcsVal = typeof hData === 'object' ? hData.pcs : hData;
-                        let noteVal = typeof hData === 'object' ? hData.note : '';
-                        if (pcsVal) {
-                            html += `${hourStr} : ${pcsVal} pcs${noteVal ? ' (' + noteVal + ')' : ''}\n`;
-                        } else {
-                            html += `${hourStr} :\n`;
-                        }
-                    } else {
-                        html += `${hourStr} :\n`;
-                    }
-                }
-                html += `---------------------------\n\n`;
-            });
-
-            document.getElementById('printReportContainer').innerText = html;
+            ljSaveNow();
+            const sc = ljScope(), txt = ljBuildReport(sc.tanggal, sc.shift);
+            if (!txt) { toast('Belum ada data jam yang diisi untuk shift ini!'); return; }
+            ljEl('printReportContainer').innerText = txt;
             window.print();
-        }
-
-        function simpanMaintenanceLog() {
-            const tanggal = document.getElementById('maintTanggal').value;
-            const shift = document.getElementById('maintShift').value;
-            const mold = document.getElementById('maintMold').value.trim();
-            const mesin = document.getElementById('maintMesin').value.trim();
-            const trouble = document.getElementById('maintTrouble').value.trim();
-            const tindakan = document.getElementById('maintTindakan').value.trim();
-            const waktu = document.getElementById('maintWaktu').value.trim();
-            const status = document.getElementById('maintStatus').value;
-
-            if (!mold || !tanggal) {
-                alert("Tanggal dan Nama/ID Mold wajib diisi!");
-                return;
-            }
-
-            const record = { tanggal, shift, mold, mesin, trouble, tindakan, waktu, status };
-            allMaintenanceLogs.push(record);
-            localStorage.setItem('localMaintenanceLogs', JSON.stringify(allMaintenanceLogs));
-            alert("Log Maintenance & Trouble berhasil disimpan!");
-            
-            document.getElementById('maintMold').value = '';
-            document.getElementById('maintMesin').value = '';
-            document.getElementById('maintTrouble').value = '';
-            document.getElementById('maintTindakan').value = '';
-            document.getElementById('maintWaktu').value = '';
-
-            renderMaintenanceLogs();
-        }
-
-        function renderMaintenanceLogs() {
-            const container = document.getElementById('maintenanceLogContent');
-            if (!container) return;
-
-            if (allMaintenanceLogs.length === 0) {
-                container.innerHTML = `<p style="color: #888; text-align: center; padding: 10px;">Belum ada log maintenance tercatat.</p>`;
-                return;
-            }
-
-            let html = `
-                <table class="detail-table" style="font-size: 0.85rem;">
-                    <thead>
-                        <tr style="background: #f8fafc;">
-                            <th>Tanggal / Shift</th>
-                            <th>Mold & Mesin</th>
-                            <th>Trouble & Tindakan</th>
-                            <th>Waktu & Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            allMaintenanceLogs.forEach((item, index) => {
-                html += `
-                    <tr>
-                        <td><strong>${item.tanggal}</strong><br><small>${item.shift}</small></td>
-                        <td><strong>${item.mold}</strong><br><small>${item.mesin || '-'}</small></td>
-                        <td><strong>Kendala:</strong> ${item.trouble || '-'}<br><strong>Tindakan:</strong> ${item.tindakan || '-'}</td>
-                        <td>${item.waktu || '-'}<br><span style="font-weight:bold;">${item.status}</span></td>
-                    </tr>
-                `;
-            });
-
-            html += `</tbody></table>`;
-            container.innerHTML = html;
-        }
-
-        function kirimMaintenanceKeWA() {
-            const tanggal = document.getElementById('maintTanggal').value;
-            const shift = document.getElementById('maintShift').value;
-
-            if (!tanggal || !shift) {
-                alert("Pilih Tanggal dan Shift terlebih dahulu!");
-                return;
-            }
-
-            const filteredLogs = allMaintenanceLogs.filter(item => item.tanggal === tanggal && item.shift === shift);
-
-            if (filteredLogs.length === 0) {
-                alert("Tidak ada log maintenance untuk Tanggal dan Shift tersebut. Silakan input dan simpan log terlebih dahulu.");
-                return;
-            }
-
-            let shiftEmoji = "🌅";
-            if (shift === 'Sore') shiftEmoji = "🌆";
-            if (shift === 'Malam') shiftEmoji = "🌙";
-
-            let pesan = `📋 *LAPORAN MAINTENANCE & TROUBLE*\n` +
-                        `🏢 PT Cahaya Buana Intitama\n` +
-                        `📅 Tanggal: ${tanggal}\n` +
-                        `${shiftEmoji} Shift: ${shift}\n\n` +
-                        `--- RUTE RUTIN ---\n` +
-                        `• Check Sheet Mould Produksi: ✅\n` +
-                        `• Gosok Mold On/Off Produksi: ✅\n\n` +
-                        `--- DETAIL TROUBLE & REPAIR ---\n`;
-
-            const angkaEmoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
-
-            filteredLogs.forEach((item, index) => {
-                let nomorNum = angkaEmoji[index] || `${index + 1}.`;
-                let statusIcon = "✅";
-                if (item.status.includes('Finishing')) statusIcon = "🔄 Lanjut Finishing";
-                if (item.status.includes('Pending')) statusIcon = "⚠️ Pending";
-
-                pesan += `${nomorNum} ${item.mold}\n` +
-                         `   • Kendala: ${item.trouble || '-'}\n` +
-                         `   • Tindakan: ${item.tindakan || '-'}\n` +
-                         `   • Jam: ${item.waktu || '-'} (${statusIcon})\n\n`;
-            });
-
-            const url = `https://wa.me/?text=${encodeURIComponent(pesan)}`;
-            window.open(url, '_blank');
-        }
-
-        function kirimControlKeWA() {
-            const tanggal = document.getElementById('ctrlTanggal').value;
-            const shift = document.getElementById('ctrlShift').value;
-
-            let targetList = [...currentBatchMachines];
-            const mesin = document.getElementById('ctrlMesin').value.trim();
-            const mold = document.getElementById('ctrlMold').value.trim();
-            if (mesin && mold) {
-                const ct = document.getElementById('ctrlCT').value.trim();
-                const target = document.getElementById('ctrlTarget').value.trim();
-                const produk = document.getElementById('ctrlProduk').value.trim();
-                const kondisi = document.getElementById('ctrlKondisi').value;
-                const permasalahan = document.getElementById('ctrlPermasalahan').value.trim();
-                const selangHidrolik = document.getElementById('ctrlSelangHidrolik').value;
-                const baut = document.getElementById('ctrlBaut').value;
-                const limitSwitch = document.getElementById('ctrlLimitSwitch').value;
-                const hourlyData = getHourlyData();
-                targetList.push({ mesin, mold, ct, target, produk, kondisi, permasalahan, selangHidrolik, baut, limitSwitch, hourlyProduction: hourlyData });
-            }
-
-            if (targetList.length === 0) {
-                alert("Belum ada data mesin yang diinput untuk dikirim ke WhatsApp!");
-                return;
-            }
-
-            let shiftEmoji = "🌅";
-            if (shift === 'Sore') shiftEmoji = "🌆";
-            if (shift === 'Malam') shiftEmoji = "🌙";
-
-            let pesan = `*Laporan Output Perjam*\n` +
-                        `*Tgl ${tanggal}*\n` +
-                        `${shiftEmoji} *Shift ${shift}*\n\n`;
-
-            targetList.forEach((item, idx) => {
-                pesan += `${idx + 1}.${item.mesin}\n` +
-                         `*${item.mold}*\n` +
-                         `* CT. : ${item.ct || "-"}\n` +
-                         `* Target : ${item.target || "-"}\n` +
-                         `* Selang Hidrolik : ${item.selangHidrolik}\n` +
-                         `* Kondisi Baut : ${item.baut || "-"}\n` +
-                         `* Cek LS : ${item.limitSwitch || "-"}\n` +
-                         `* Kondisi Produk : ${item.kondisi}\n`;
-                
-                if (item.kondisi === 'NG') {
-                    pesan += `* Permasalahan : ${item.permasalahan}\n`;
-                }
-
-                pesan += `\n`;
-
-                const shiftType = shift;
-                let start = 9, end = 15;
-                if (shiftType === 'Sore') { start = 17; end = 23; }
-                else if (shiftType === 'Malam') { start = 1; end = 7; }
-
-                let hObj = typeof item.hourlyProduction === 'string' ? JSON.parse(item.hourlyProduction) : item.hourlyProduction;
-                for (let i = start; i <= end; i++) {
-                    let hourStr = i < 10 ? `0${i}:00` : `${i}:00`;
-                    let hData = hObj ? hObj[hourStr] : null;
-                    if (hData) {
-                        let pcsVal = typeof hData === 'object' ? hData.pcs : hData;
-                        let noteVal = typeof hData === 'object' ? hData.note : '';
-                        if (pcsVal) {
-                            pesan += `${hourStr} : ${pcsVal} pcs${noteVal ? ' (' + noteVal + ')' : ''}\n`;
-                        } else {
-                            pesan += `${hourStr} :\n`;
-                        }
-                    } else {
-                        pesan += `${hourStr} :\n`;
-                    }
-                }
-                pesan += `\n`;
-            });
-
-            const url = `https://wa.me/?text=${encodeURIComponent(pesan)}`;
-            window.open(url, '_blank');
-
-            // Reset batch list automatically after sending to WhatsApp
-            currentBatchMachines = [];
-            renderBatchList();
-        }
-
-        function renderFullDayTable() {
-            const tanggalFilter = document.getElementById('filterTanggal').value;
-            const container = document.getElementById('fullDayContent');
-
-            const filtered = allControlRecords.filter(r => r.tanggal === tanggalFilter);
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<p style="color: #888; text-align: center; padding: 20px;">Belum ada data untuk tanggal ${tanggalFilter || 'tersebut'}. Silakan input terlebih dahulu di menu <strong>Control Mold Produksi</strong>.</p>`;
-                return;
-            }
-
-            let html = `
-                <h3 style="color: var(--primary-color); margin-bottom: 10px; font-size: 1.1rem;">Rekap Siklus Harian (Malam ➔ Pagi ➔ Sore) - ${tanggalFilter}</h3>
-                <table class="detail-table" style="font-size: 0.85rem;">
-                    <thead>
-                        <tr style="background: #f8fafc;">
-                            <th>Shift</th>
-                            <th>Mesin / Lane</th>
-                            <th>Mold / Produk</th>
-                            <th>Kondisi</th>
-                            <th>Ringkasan Produksi / Jam</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            const shiftOrder = ['Malam', 'Pagi', 'Sore'];
-            filtered.sort((a,b) => shiftOrder.indexOf(a.shift) - shiftOrder.indexOf(b.shift));
-
-            filtered.forEach(rec => {
-                let shiftEmoji = "🌅";
-                if (rec.shift === 'Sore') shiftEmoji = "🌆";
-                if (rec.shift === 'Malam') shiftEmoji = "🌙";
-
-                let hourlyText = "-";
-                try {
-                    let hObj = typeof rec.hourlyProduction === 'string' ? JSON.parse(rec.hourlyProduction) : rec.hourlyProduction;
-                    if (hObj) {
-                        hourlyText = Object.entries(hObj).map(([k,v]) => {
-                            if (typeof v === 'object' && v !== null) {
-                                return `${k}:${v.pcs}p${v.note ? ' ('+v.note+')':''}`;
-                            }
-                            return `${k}:${v}p`;
-                        }).join(', ');
-                    }
-                } catch(e) {}
-
-                html += `
-                    <tr>
-                        <td><strong>${shiftEmoji} ${rec.shift || '-'}</strong></td>
-                        <td>${rec.mesin || '-'}<br><small>${rec.lane || '-'}</small></td>
-                        <td><strong>${rec.mold || '-'}</strong><br><small>${rec.produk || '-'}</small></td>
-                        <td><span style="color:${rec.kondisi === 'OK' ? 'green':'red'}; font-weight:bold;">${rec.kondisi || '-'}</span></td>
-                        <td><small>${hourlyText}</small></td>
-                    </tr>
-                `;
-            });
-
-            html += `</tbody></table>`;
-            container.innerHTML = html;
         }
 
         function toggleSidebar() {
@@ -1325,27 +990,20 @@
         }
 
         function hideAllViews() {
-            document.getElementById('view-welcome').classList.add('hidden');
-            document.getElementById('view-home').classList.add('hidden');
-            document.getElementById('view-control').classList.add('hidden');
-            document.getElementById('view-maintenance-trouble').classList.add('hidden');
-            document.getElementById('view-fullday').classList.add('hidden');
-            document.getElementById('view-maintenance').classList.add('hidden');
-            document.getElementById('view-detail').classList.add('hidden');
+            document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden'));
         }
 
         function showView(viewId, pushHistory = true) {
+            if (!isValidView(viewId)) viewId = 'view-welcome';
+            if (viewId === 'view-control') setTimeout(ljRefresh, 0);
             hideAllViews();
             document.getElementById(viewId).classList.remove('hidden');
             document.getElementById('sidebarMenu').classList.remove('active');
             document.getElementById('overlay').classList.remove('active');
             
-            if (viewId === 'view-fullday') {
-                renderFullDayTable();
-            }
 
             if (pushHistory) {
-                window.history.pushState({ view: viewId }, '', window.location.pathname + (viewId !== 'view-welcome' ? `?view=${viewId}` : ''));
+                safePush({ view: viewId }, window.location.pathname + (viewId !== 'view-welcome' ? `?view=${viewId}` : ''));
             }
         }
 
@@ -1383,7 +1041,7 @@
             const keys = Object.keys(moldDatabase);
 
             if (keys.length === 0) {
-                grid.innerHTML = `<div class="empty-state">Belum ada data Mold di Spreadsheet. Klik "+ Tambah Asset Mold" di atas.</div>`;
+                grid.innerHTML = `<div class="empty-state">${moldLoadState === 'error' ? 'Gagal memuat data dari spreadsheet. Periksa koneksi lalu muat ulang halaman.' : 'Belum ada data Mold di Spreadsheet. Klik "+ Tambah Asset Mold" di atas.'}</div>`;
             } else {
                 keys.forEach(id => {
                     const item = moldDatabase[id];
@@ -1401,10 +1059,10 @@
                     }
 
                     card.innerHTML = `
-                        <h3>${item.id}</h3>
-                        <p class="nama-mold">${item.nama}</p>
-                        <p class="nama-produk">Prd: ${item.produk}</p>
-                        <span class="status-badge ${statusClass}">${item.status}</span>
+                        <h3>${esc(item.id)}</h3>
+                        <p class="nama-mold">${esc(item.nama)}</p>
+                        <p class="nama-produk">Prd: ${esc(item.produk)}</p>
+                        <span class="status-badge ${statusClass}">${esc(item.status)}</span>
                     `;
                     grid.appendChild(card);
                 });
@@ -1466,7 +1124,7 @@
             document.getElementById('btnGoogleForm').href = `https://forms.google.com`; 
 
             if (pushHistory) {
-                window.history.pushState({ view: 'view-detail', id: moldId }, '', `?id=${moldId}`);
+                safePush({ view: 'view-detail', id: moldId }, `?id=${encodeURIComponent(moldId)}`);
             }
         }
 
@@ -1474,8 +1132,10 @@
             setDefaultDate();
             updateShiftHours();
 
+            ljInit();
+
             if (!window.history.state) {
-                window.history.replaceState({ view: 'view-welcome' }, '', window.location.pathname);
+                safeReplace({ view: 'view-welcome' }, window.location.pathname);
             }
 
             loadDataFromSheet();
@@ -1483,7 +1143,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const viewParam = urlParams.get('view');
             
-            if (viewParam) {
+            if (isValidView(viewParam)) {
                 showView(viewParam, false);
             } else {
                 showView('view-welcome', false);
