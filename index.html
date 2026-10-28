@@ -229,7 +229,7 @@
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast-success { background: var(--success-color); }
         .toast-error { background: var(--danger-color); }
-        @media print { .toast-wrap { display: none !important; } }
+        @media print { .toast-wrap, #ljBox, #syncStatus { display: none !important; } }
     </style>
 </head>
 <body>
@@ -510,6 +510,10 @@
                 <div id="printReportContainer" class="print-only"></div>
 
                 <div style="margin-top: 25px;">
+                    <div id="ljBox" style="margin-bottom:14px; background:#f8fafc; border:1px dashed var(--primary-color); border-radius:8px; padding:12px;">
+                        <div style="font-weight:bold; color:var(--primary-color); margin-bottom:8px;">📋 Mesin / Mold dalam laporan shift ini: <span id="ljCount">0</span></div>
+                        <div id="ljList"></div>
+                    </div>
                     <p id="syncStatus" style="text-align:center; font-size:0.85rem; margin-bottom:10px; color:#666;"></p>
                     <button class="btn-action-full" style="background-color: #0284c7; margin-bottom: 10px;" onclick="tambahMoldLain()">➕ Simpan & Input Mold / Mesin Lain</button>
                     <button class="btn-action-full btn-wa" style="width:100%; padding:16px; font-size:1.05rem;" onclick="kirimControlKeWA()">💬 Kirim Laporan ke WhatsApp</button>
@@ -834,25 +838,23 @@
         }
 
         // ===== Laporan Output Per Jam =====
+        // Data diikat ke tanggal + shift + mesin + "grup" (id internal), BUKAN ke nama mold yang diketik.
+        // Jadi nama mold boleh diubah/diperbaiki, dan data tetap muncul lagi setelah refresh.
         const LAPORAN_URL = "https://script.google.com/macros/s/AKfycbzDDdMBDexjpAUgsQOcHRRwQdEmWEmSFTJl91I8ykjaXs_f0BJMU5xYiGHJ2EN8Ns7G/exec";
         const LJ_FIELDS = { ct: 'ctrlCT', target: 'ctrlTarget', mold: 'ctrlMold', produk: 'ctrlProduk', kondisi: 'ctrlKondisi',
             permasalahan: 'ctrlPermasalahan', selangHidrolik: 'ctrlSelangHidrolik', baut: 'ctrlBaut', hidrolik: 'ctrlHidrolik', limitSwitch: 'ctrlLimitSwitch' };
-        let ljRows = {}, ljPending = {}, ljEditAt = {}, ljSync = null, ljSaveTimer = null, ljLastScope = null;
-        
-        const ljKey = (t, s, m, mold, j) => [t, s, m, (mold || '-').trim(), normJam(j)].join('|');
+        let ljRows = {}, ljPending = {}, ljEditAt = {}, ljSaveTimer = null, ljLastScope = null;
+        let ljGrp = null, ljFreshGrp = null, ljDirty = false;
+
+        const ljKey = (t, s, m, g, j) => [t, s, m, g, normJam(j)].join('|');
         const ljRecent = k => Date.now() - (ljEditAt[k] || 0) < 15000;
         const ljHH = i => (i < 10 ? '0' + i : '' + i) + ':00';
         const ljHours = shift => shift === 'Sore' ? [17, 23] : shift === 'Malam' ? [1, 7] : [9, 15];
         const ljEl = id => document.getElementById(id);
+        const ljNewGrp = () => 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
         function ljScope() {
-            return { 
-                tanggal: ljEl('ctrlTanggal').value, 
-                shift: ljEl('ctrlShift').value, 
-                lane: ljEl('ctrlLane').value, 
-                mesin: ljEl('ctrlMesin').value,
-                mold: ljEl('ctrlMold') ? ljEl('ctrlMold').value.trim() : ''
-            };
+            return { tanggal: ljEl('ctrlTanggal').value, shift: ljEl('ctrlShift').value, lane: ljEl('ctrlLane').value, mesin: ljEl('ctrlMesin').value };
         }
         function ljPersist() { safeSet('ljRows', JSON.stringify(ljRows)); safeSet('ljPending', JSON.stringify(ljPending)); }
         function ljStatus(msg, bad) {
@@ -860,12 +862,64 @@
             if (el) { el.textContent = msg; el.style.color = bad ? '#b45309' : '#15803d'; }
         }
 
+        // Samakan format baris (data lama maupun dari spreadsheet) -> pastikan ada grup & jam rapi
+        function ljNorm(r) {
+            if (r.jam) r.jam = normJam(r.jam);
+            const p = String(r.key || '').split('|');
+            if (p.length === 4) p.splice(3, 0, '-');
+            if (p.length === 5) {
+                if (p[4] !== 'META') p[4] = normJam(p[4]);
+                if (!r.grp) r.grp = p[3];
+                r.key = p.join('|');
+            }
+            if (!r.grp) r.grp = '-';
+            return r;
+        }
+
+        function ljSaveSel() { const s = ljScope(); safeSet('ljSel', JSON.stringify({ lane: s.lane, mesin: s.mesin, shift: s.shift })); }
+        function ljRestoreSel() {
+            try {
+                const o = JSON.parse(safeGet('ljSel') || 'null');
+                if (!o) return;
+                if (laneMachines[o.lane]) {
+                    ljEl('ctrlLane').value = o.lane; updateLaneMachines();
+                    if (laneMachines[o.lane].includes(o.mesin)) ljEl('ctrlMesin').value = o.mesin;
+                }
+                if (['Pagi', 'Sore', 'Malam'].includes(o.shift)) { ljEl('ctrlShift').value = o.shift; updateShiftHours(); }
+            } catch (e) { /* abaikan */ }
+        }
+
+        // Kumpulkan grup (mesin + mold) pada tanggal+shift terpilih
+        function ljGroups(sc) {
+            const g = {};
+            Object.values(ljRows).forEach(r => {
+                if (r.tanggal !== sc.tanggal || r.shift !== sc.shift) return;
+                const x = g[r.mesin + '|' + r.grp] = g[r.mesin + '|' + r.grp] || { grp: r.grp, mesin: r.mesin, mold: '', jam: 0, last: 0, meta: null, rows: {} };
+                x.last = Math.max(x.last, Number(r.updatedAt) || 0);
+                if (r.tipe === 'meta') { x.meta = r; x.mold = r.mold || x.mold; }
+                else { x.rows[normJam(r.jam)] = r; if (r.pcs) x.jam++; if (!x.mold) x.mold = r.mold || ''; }
+            });
+            return Object.values(g);
+        }
+
+        function ljFormEmpty() {
+            const f = Object.values(LJ_FIELDS).every(id => { const el = ljEl(id); return !el || el.tagName === 'SELECT' || !el.value; });
+            const [a, b] = ljHours(ljEl('ctrlShift').value);
+            for (let i = a; i <= b; i++) {
+                const p = ljEl('hour_pcs_' + i), n = ljEl('hour_note_' + i);
+                if ((p && p.value) || (n && n.value)) return false;
+            }
+            return f;
+        }
+
         function ljInit() {
             try { ljRows = JSON.parse(safeGet('ljRows') || '{}') || {}; ljPending = JSON.parse(safeGet('ljPending') || '{}') || {}; }
             catch (e) { ljRows = {}; ljPending = {}; }
             const d = new Date(); d.setDate(d.getDate() - 3);
             const min = dateToLocalISO(d);
-            Object.keys(ljRows).forEach(k => { if (!ljRows[k] || ljRows[k].tanggal < min) { delete ljRows[k]; delete ljPending[k]; } });
+            const fix = o => { Object.keys(o).forEach(k => { const r = o[k]; if (!r || r.tanggal < min) { delete o[k]; return; } ljNorm(r); if (r.key !== k) { delete o[k]; o[r.key] = r; } }); };
+            fix(ljRows); fix(ljPending);
+
             const view = ljEl('view-control');
             const scopeIds = ['ctrlTanggal', 'ctrlLane', 'ctrlMesin', 'ctrlShift'];
             const fieldIds = Object.values(LJ_FIELDS);
@@ -873,34 +927,35 @@
                 const id = e.target.id || '';
                 if (scopeIds.includes(id)) {
                     if (e.type !== 'change') return;
-                    ljSaveNow(); ljFill(true); ljRefresh(); return;
+                    ljSaveNow(); ljFreshGrp = null; ljSaveSel(); ljFill(true); ljRefresh(); return;
                 }
-                const sc = ljLastScope || ljScope();
-                const moldVal = sc.mold || ljEl('ctrlMold').value.trim();
                 const m = id.match(/^hour_(?:pcs|note)_(\d+)$/);
-                if (m) ljEditAt[ljKey(sc.tanggal, sc.shift, sc.mesin, moldVal, ljHH(+m[1]))] = Date.now();
-                else if (fieldIds.includes(id)) ljEditAt[ljKey(sc.tanggal, sc.shift, sc.mesin, moldVal, 'META')] = Date.now();
-                else return;
+                if (!m && !fieldIds.includes(id)) return;
+                const sc = ljLastScope || ljScope();
+                if (!ljGrp) ljGrp = ljNewGrp();
+                ljEditAt[ljKey(sc.tanggal, sc.shift, sc.mesin, ljGrp, m ? ljHH(+m[1]) : 'META')] = Date.now();
+                ljDirty = true;
                 clearTimeout(ljSaveTimer);
                 ljSaveTimer = setTimeout(ljSaveNow, 700);
             };
             view.addEventListener('input', onEdit);
             view.addEventListener('change', onEdit);
+            ljEl('ljList').addEventListener('click', e => { const b = e.target.closest('[data-g]'); if (b) ljPilihGrup(b.dataset.m, b.dataset.g); });
+
+            ljRestoreSel();
             ljFill(true);
             ljStatus('Memeriksa sinkronisasi...');
             setInterval(() => { if (!document.hidden && !view.classList.contains('hidden')) ljRefresh(); else ljFlush(); }, 20000);
             window.addEventListener('online', () => ljRefresh());
         }
 
+        // Simpan isi form ke draf lokal + antrean kirim (hanya baris yang berubah, hanya jika pengguna mengetik)
         function ljSaveNow() {
             clearTimeout(ljSaveTimer);
-            const sc = ljLastScope || ljScope();
-            if (!sc || !sc.mesin) return;
-            const moldVal = (sc.mold || ljEl('ctrlMold').value.trim() || '-');
-            if (!moldVal || moldVal === '-') return;
-
+            const sc = ljLastScope;
+            if (!ljDirty || !sc || !sc.mesin || !ljGrp) return;
             const v = id => { const el = ljEl(id); return el ? el.value.trim() : null; };
-            const now = Date.now(), base = { tanggal: sc.tanggal, shift: sc.shift, lane: sc.lane, mesin: sc.mesin, mold: moldVal };
+            const now = Date.now(), base = { tanggal: sc.tanggal, shift: sc.shift, lane: sc.lane, mesin: sc.mesin, grp: ljGrp, mold: v('ctrlMold') || '' };
             let changed = false;
             const push = (row, k) => {
                 const old = ljRows[k];
@@ -909,72 +964,66 @@
             };
             const meta = {};
             Object.keys(LJ_FIELDS).forEach(f => { meta[f] = v(LJ_FIELDS[f]); });
-            push(Object.assign({}, base, { tipe: 'meta', jam: '' }, meta), ljKey(sc.tanggal, sc.shift, sc.mesin, moldVal, 'META'));
-
+            push(Object.assign({}, base, { tipe: 'meta', jam: '' }, meta), ljKey(sc.tanggal, sc.shift, sc.mesin, ljGrp, 'META'));
             const [a, b] = ljHours(sc.shift);
             for (let i = a; i <= b; i++) {
-                const pcs = v('hour_pcs_' + i), note = v('hour_note_' + i), jam = ljHH(i), k = ljKey(sc.tanggal, sc.shift, sc.mesin, moldVal, jam);
+                const pcs = v('hour_pcs_' + i), note = v('hour_note_' + i), jam = ljHH(i), k = ljKey(sc.tanggal, sc.shift, sc.mesin, ljGrp, jam);
                 if (pcs === null) continue;
                 if (pcs || note) push(Object.assign({}, base, { tipe: 'jam', jam, pcs, note }), k);
                 else if (ljRows[k] && ljEditAt[k]) {
                     delete ljRows[k]; ljPending[k] = Object.assign({}, base, { key: k, tipe: 'jam', jam, hapus: true, updatedAt: now }); changed = true;
                 }
             }
-            if (changed) { ljPersist(); ljFlush(); }
+            if (changed) { ljPersist(); ljFlush(); ljRenderList(); setTimeout(ljRefresh, 3000); }
         }
 
         function ljFlush() {
-            if (!ljSync) return;
-            const sent = Object.assign({}, ljPending), rows = Object.values(sent);
+            if (!/^https:\/\//.test(LAPORAN_URL)) return;
+            const rows = Object.values(ljPending);
             if (!rows.length) return;
             fetch(LAPORAN_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'laporanJam', rows }) })
-                .then(() => { Object.keys(sent).forEach(k => { if (ljPending[k] === sent[k]) delete ljPending[k]; }); ljPersist(); })
-                .catch(() => ljStatus('Offline - data tersimpan di HP ini dan dikirim otomatis nanti', true));
+                .catch(err => ljStatus('❌ Gagal mengirim ke spreadsheet laporan (' + (err.message || err) + '). Data tersimpan di HP ini.', true));
         }
 
         function ljRefresh() {
             const sc = ljScope();
             if (!sc.tanggal) return Promise.resolve();
-            if (!/^https:\/\//.test(LAPORAN_URL)) { ljSync = false; ljStatus('⚠️ Spreadsheet laporan belum diatur - data hanya ada di HP ini', true); return Promise.resolve(); }
+            if (!/^https:\/\//.test(LAPORAN_URL)) { ljStatus('⚠️ Spreadsheet laporan belum diatur - data hanya ada di HP ini', true); return Promise.resolve(); }
             const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 10000);
             const url = `${LAPORAN_URL}?action=laporanJam&tanggal=${encodeURIComponent(sc.tanggal)}&shift=${encodeURIComponent(sc.shift)}&_=${Date.now()}`;
             return fetch(url, { signal: ctrl.signal }).then(r => r.json()).then(d => {
                 clearTimeout(t);
-                if (!d || d.ok !== true || !Array.isArray(d.rows)) { ljSync = false; ljStatus('⚠️ Sinkron antar-HP belum aktif - data hanya ada di HP ini', true); return; }
-                ljSync = true;
+                if (!d || d.ok !== true || !Array.isArray(d.rows)) { ljStatus('❌ Spreadsheet laporan membalas format tak dikenal. Cek deployment Apps Script (akses "Anyone", versi terbaru).', true); return; }
                 const remote = {};
-                d.rows.forEach(r => { 
-                    if (r.jam) r.jam = normJam(r.jam);
-                    if (r.key) {
-                        const parts = r.key.split('|');
-                        if (parts.length === 5 && parts[4] !== 'META') {
-                            parts[4] = normJam(parts[4]);
-                            r.key = parts.join('|');
-                        } else if (parts.length === 4 && parts[3] !== 'META') {
-                            parts[3] = normJam(parts[3]);
-                            r.key = parts.join('|');
-                        }
-                    }
-                    remote[r.key] = r; 
+                d.rows.forEach(r => { ljNorm(r); remote[r.key] = r; });
+                // konfirmasi: antrean baru dihapus setelah terbaca di spreadsheet
+                Object.keys(ljPending).forEach(k => {
+                    const pd = ljPending[k], rm = remote[k];
+                    if (pd.hapus ? (!rm && Date.now() - pd.updatedAt > 10000) : (rm && Number(rm.updatedAt) >= Number(pd.updatedAt))) delete ljPending[k];
                 });
                 Object.keys(ljRows).forEach(k => {
                     const r = ljRows[k];
                     if (r.tanggal === sc.tanggal && r.shift === sc.shift && !remote[k] && !ljPending[k] && !ljRecent(k)) delete ljRows[k];
                 });
                 Object.keys(remote).forEach(k => { if (!ljPending[k] && !ljRecent(k)) ljRows[k] = remote[k]; });
-                ljPersist(); ljFill(false); ljFlush();
-                ljStatus('✅ Tersinkron ' + new Date().toTimeString().slice(0, 5));
-            }).catch(() => { clearTimeout(t); ljStatus('Offline - memakai data tersimpan di HP ini', true); });
+                ljPersist();
+                if (!ljDirty && ljFormEmpty()) ljFill(true); else ljFill(false);
+                ljFlush();
+                const pend = Object.keys(ljPending).length;
+                ljStatus(pend ? '⏳ ' + pend + ' data menunggu konfirmasi spreadsheet...' : '✅ Tersinkron ' + new Date().toTimeString().slice(0, 5), !!pend);
+            }).catch(err => { clearTimeout(t); ljStatus('❌ Tidak bisa terhubung ke spreadsheet laporan (' + (err.message || err) + '). ' + Object.keys(ljPending).length + ' data tersimpan di HP ini.', true); });
         }
 
+        // Isi form dari draf. clear=true: ganti mesin/shift/tanggal -> kosongkan lalu muat data mesin itu
         function ljFill(clear) {
             const sc = ljScope();
             if (clear) {
-                ljLastScope = sc;
+                ljLastScope = sc; ljDirty = false;
+                const mine = ljGroups(sc).filter(x => x.mesin === sc.mesin).sort((a, b) => b.last - a.last);
+                if (!(ljGrp && (ljGrp === ljFreshGrp || mine.some(x => x.grp === ljGrp)))) ljGrp = mine.length ? mine[0].grp : ljNewGrp();
                 Object.values(LJ_FIELDS).forEach(id => { const el = ljEl(id); if (el) { if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = ''; } });
             }
-            const moldVal = sc.mold || '-';
-            const mk = ljKey(sc.tanggal, sc.shift, sc.mesin, moldVal, 'META'), meta = ljRows[mk];
+            const mk = ljKey(sc.tanggal, sc.shift, sc.mesin, ljGrp, 'META'), meta = ljRows[mk];
             if (meta && (clear || !ljRecent(mk))) {
                 Object.keys(LJ_FIELDS).forEach(f => { const el = ljEl(LJ_FIELDS[f]); if (el && document.activeElement !== el && meta[f] !== undefined) el.value = meta[f]; });
             }
@@ -982,50 +1031,63 @@
             if (meta && meta.kondisi === 'NG' && ljEl('ctrlPermasalahan') && !ljEl('ctrlPermasalahan').value) ljEl('ctrlPermasalahan').value = meta.permasalahan || '';
             const [a, b] = ljHours(sc.shift);
             for (let i = a; i <= b; i++) {
-                const k = ljKey(sc.tanggal, sc.shift, sc.mesin, moldVal, ljHH(i)), r = ljRows[k];
+                const k = ljKey(sc.tanggal, sc.shift, sc.mesin, ljGrp, ljHH(i)), r = ljRows[k];
                 [['hour_pcs_', 'pcs'], ['hour_note_', 'note']].forEach(([p, f]) => {
                     const el = ljEl(p + i);
                     if (el && (clear || (document.activeElement !== el && !ljRecent(k) && !ljPending[k]))) el.value = r ? (r[f] || '') : '';
                 });
             }
+            ljRenderList();
+        }
+
+        function ljOrder() {
+            const o = {}; let n = 0;
+            Object.keys(laneMachines).forEach(l => laneMachines[l].forEach(m => { o[m] = n++; }));
+            return o;
+        }
+        function ljSorted(list) {
+            const o = ljOrder();
+            return list.sort((p, q) => ((o[p.mesin] === undefined ? 999 : o[p.mesin]) - (o[q.mesin] === undefined ? 999 : o[q.mesin])) || String(p.grp).localeCompare(String(q.grp)));
+        }
+
+        // Daftar semua mesin/mold yang masuk laporan shift ini (ketuk untuk membuka & mengedit)
+        function ljRenderList() {
+            const box = ljEl('ljList');
+            if (!box) return;
+            const sc = ljScope(), list = ljSorted(ljGroups(sc));
+            ljEl('ljCount').textContent = list.length;
+            box.innerHTML = list.length ? list.map(x => {
+                const on = x.mesin === sc.mesin && x.grp === ljGrp;
+                return `<button type="button" data-m="${esc(x.mesin)}" data-g="${esc(x.grp)}" style="display:block; width:100%; text-align:left; margin-bottom:6px; padding:8px 10px; border-radius:6px; ` +
+                       `border:1px solid ${on ? 'var(--primary-color)' : '#cbd5e1'}; background:${on ? '#e8ecff' : '#fff'}; cursor:pointer; font-size:0.85rem;">` +
+                       `<strong>${esc(x.mesin)}</strong> - ${esc(x.mold) || '(mold belum diisi)'} <small style="color:#666;">• ${x.jam} jam terisi</small></button>`;
+            }).join('') : '<p style="color:#888; font-size:0.85rem;">Belum ada data pada shift ini.</p>';
+        }
+
+        function ljPilihGrup(mesin, grp) {
+            ljSaveNow();
+            const lane = Object.keys(laneMachines).find(l => laneMachines[l].includes(mesin));
+            if (lane) { ljEl('ctrlLane').value = lane; updateLaneMachines(); }
+            ljEl('ctrlMesin').value = mesin;
+            ljGrp = grp; ljFreshGrp = null;
+            ljSaveSel(); ljFill(true);
+            ljEl('view-control').scrollIntoView({ behavior: 'smooth' });
         }
 
         function ljBuildReport(tanggal, shift) {
-            const order = {}; let n = 0;
-            Object.keys(laneMachines).forEach(l => laneMachines[l].forEach(m => { order[m] = n++; }));
-            const by = {};
-            Object.values(ljRows).forEach(r => {
-                if (r.tanggal !== tanggal || r.shift !== shift) return;
-                const moldName = r.mold || '-';
-                const groupKey = r.mesin + '___' + moldName;
-                const x = by[groupKey] = by[groupKey] || { mesin: r.mesin, mold: moldName, meta: null, jam: {} };
-                if (r.tipe === 'meta') {
-                    x.meta = r; 
-                } else {
-                    const h = normJam(r.jam);
-                    if (h) x.jam[h] = r;
-                }
-            });
-            const keys = Object.keys(by).sort((a, b) => {
-                const mA = by[a].mesin, mB = by[b].mesin;
-                const posA = order[mA] !== undefined ? order[mA] : 999;
-                const posB = order[mB] !== undefined ? order[mB] : 999;
-                if (posA !== posB) return posA - posB;
-                return by[a].mold.localeCompare(by[b].mold);
-            });
-            if (!keys.length) return '';
+            const list = ljSorted(ljGroups({ tanggal, shift }));
+            if (!list.length) return '';
             const emoji = shift === 'Sore' ? '🌆' : shift === 'Malam' ? '🌙' : '🌅';
             const [a, b] = ljHours(shift);
             let t = `*Laporan Output Perjam*\n*Tgl ${tanggal}*\n${emoji} *Shift ${shift}*\n\n`;
-            keys.forEach((gKey, idx) => {
-                const x = by[gKey], d = x.meta || {};
-                t += `${idx + 1}. ${x.mesin}\n*${x.mold}*\n* CT. : ${d.ct || '-'}\n* Target : ${d.target || '-'}\n` +
+            list.forEach((x, idx) => {
+                const d = x.meta || {};
+                t += `${idx + 1}. ${x.mesin}\n*${x.mold || '-'}*\n* CT. : ${d.ct || '-'}\n* Target : ${d.target || '-'}\n` +
                      `* Selang Hidrolik : ${d.selangHidrolik || '-'}\n* Kondisi Baut : ${d.baut || '-'}\n* Cek LS : ${d.limitSwitch || '-'}\n* Kondisi Produk : ${d.kondisi || '-'}\n`;
                 if (d.kondisi === 'NG') t += `* Permasalahan : ${d.permasalahan || '-'}\n`;
                 t += '\n';
                 for (let i = a; i <= b; i++) {
-                    const h = ljHH(i);
-                    const r = x.jam[h] || x.jam[normJam(i + ':00')];
+                    const h = ljHH(i), r = x.rows[h];
                     t += r && r.pcs ? `${h} : ${r.pcs} pcs${r.note ? ' (' + r.note + ')' : ''}\n` : `${h} :${r && r.note ? ' (' + r.note + ')' : ''}\n`;
                 }
                 t += '\n';
@@ -1033,25 +1095,13 @@
             return t;
         }
 
+        // Simpan data saat ini, lalu siapkan form kosong untuk mold / mesin berikutnya
         function tambahMoldLain() {
             ljSaveNow();
-            document.getElementById('ctrlMold').value = '';
-            document.getElementById('ctrlProduk').value = '';
-            document.getElementById('ctrlCT').value = '';
-            document.getElementById('ctrlTarget').value = '';
-            document.getElementById('ctrlPermasalahan').value = '';
-            
-            const shift = document.getElementById('ctrlShift').value;
-            const [a, b] = ljHours(shift);
-            for (let i = a; i <= b; i++) {
-                const pcsEl = document.getElementById('hour_pcs_' + i);
-                const noteEl = document.getElementById('hour_note_' + i);
-                if (pcsEl) pcsEl.value = '';
-                if (noteEl) noteEl.value = '';
-            }
-            
-            ljLastScope = ljScope();
-            toast('Data mold sebelumnya tersimpan! Silakan isi data mold berikutnya.', 'success');
+            ljGrp = ljNewGrp(); ljFreshGrp = ljGrp;
+            ljFill(true);
+            toast('Data tersimpan! Silakan isi mold berikutnya (ganti mesin di kolom Mesin bila perlu).', 'success');
+            ljEl('view-control').scrollIntoView({ behavior: 'smooth' });
         }
 
         async function kirimControlKeWA() {
