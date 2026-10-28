@@ -865,12 +865,17 @@
         // Samakan format baris (data lama maupun dari spreadsheet) -> pastikan ada grup & jam rapi
         function ljNorm(r) {
             if (r.jam) r.jam = normJam(r.jam);
+            const orig = r.key;
             const p = String(r.key || '').split('|');
             if (p.length === 4) p.splice(3, 0, '-');
             if (p.length === 5) {
                 if (p[4] !== 'META') p[4] = normJam(p[4]);
                 if (!r.grp) r.grp = p[3];
                 r.key = p.join('|');
+                if (r.key !== orig && !r.rawKey) r.rawKey = orig;
+                // key selalu teks utuh, jadi dipakai sebagai sumber tanggal/shift/mesin/jam (kolom spreadsheet bisa berubah format)
+                r.tanggal = p[0]; r.shift = p[1]; r.mesin = p[2];
+                if (p[4] !== 'META') r.jam = p[4];
             }
             if (!r.grp) r.grp = '-';
             return r;
@@ -894,10 +899,10 @@
             const g = {};
             Object.values(ljRows).forEach(r => {
                 if (r.tanggal !== sc.tanggal || r.shift !== sc.shift) return;
-                const x = g[r.mesin + '|' + r.grp] = g[r.mesin + '|' + r.grp] || { grp: r.grp, mesin: r.mesin, mold: '', jam: 0, last: 0, meta: null, rows: {} };
+                const x = g[r.mesin + '|' + r.grp] = g[r.mesin + '|' + r.grp] || { grp: r.grp, mesin: r.mesin, mold: '', jam: 0, any: 0, last: 0, meta: null, rows: {} };
                 x.last = Math.max(x.last, Number(r.updatedAt) || 0);
                 if (r.tipe === 'meta') { x.meta = r; x.mold = r.mold || x.mold; }
-                else { x.rows[normJam(r.jam)] = r; if (r.pcs) x.jam++; if (!x.mold) x.mold = r.mold || ''; }
+                else { x.rows[normJam(r.jam)] = r; x.any++; if (r.pcs) x.jam++; if (!x.mold) x.mold = r.mold || ''; }
             });
             return Object.values(g);
         }
@@ -940,7 +945,13 @@
             };
             view.addEventListener('input', onEdit);
             view.addEventListener('change', onEdit);
-            ljEl('ljList').addEventListener('click', e => { const b = e.target.closest('[data-g]'); if (b) ljPilihGrup(b.dataset.m, b.dataset.g); });
+            ljEl('ljList').addEventListener('click', e => {
+                const del = e.target.closest('[data-dg]');
+                if (del) { ljHapusGrup(del.dataset.dm, del.dataset.dg); return; }
+                if (e.target.closest('[data-clean]')) { ljBersihkanKosong(); return; }
+                const b = e.target.closest('[data-g]');
+                if (b) ljPilihGrup(b.dataset.m, b.dataset.g);
+            });
 
             ljRestoreSel();
             ljFill(true);
@@ -1050,18 +1061,56 @@
             return list.sort((p, q) => ((o[p.mesin] === undefined ? 999 : o[p.mesin]) - (o[q.mesin] === undefined ? 999 : o[q.mesin])) || String(p.grp).localeCompare(String(q.grp)));
         }
 
-        // Daftar semua mesin/mold yang masuk laporan shift ini (ketuk untuk membuka & mengedit)
+        // Daftar semua mesin/mold yang masuk laporan shift ini: ketuk untuk mengedit, 🗑️ untuk menghapus
         function ljRenderList() {
             const box = ljEl('ljList');
             if (!box) return;
             const sc = ljScope(), list = ljSorted(ljGroups(sc));
             ljEl('ljCount').textContent = list.length;
-            box.innerHTML = list.length ? list.map(x => {
-                const on = x.mesin === sc.mesin && x.grp === ljGrp;
-                return `<button type="button" data-m="${esc(x.mesin)}" data-g="${esc(x.grp)}" style="display:block; width:100%; text-align:left; margin-bottom:6px; padding:8px 10px; border-radius:6px; ` +
-                       `border:1px solid ${on ? 'var(--primary-color)' : '#cbd5e1'}; background:${on ? '#e8ecff' : '#fff'}; cursor:pointer; font-size:0.85rem;">` +
-                       `<strong>${esc(x.mesin)}</strong> - ${esc(x.mold) || '(mold belum diisi)'} <small style="color:#666;">• ${x.jam} jam terisi</small></button>`;
-            }).join('') : '<p style="color:#888; font-size:0.85rem;">Belum ada data pada shift ini.</p>';
+            if (!list.length) { box.innerHTML = '<p style="color:#888; font-size:0.85rem;">Belum ada data pada shift ini.</p>'; return; }
+            const kosong = list.filter(x => !x.any && !(x.mesin === sc.mesin && x.grp === ljGrp)).length;
+            box.innerHTML = '<p style="color:#666; font-size:0.78rem; margin-bottom:8px;">Ketuk entri untuk membuka &amp; mengedit. Ketuk 🗑️ untuk menghapus.</p>' +
+                list.map(x => {
+                    const on = x.mesin === sc.mesin && x.grp === ljGrp;
+                    return `<div style="display:flex; gap:6px; margin-bottom:6px;">` +
+                        `<button type="button" data-m="${esc(x.mesin)}" data-g="${esc(x.grp)}" style="flex:1; text-align:left; padding:8px 10px; border-radius:6px; ` +
+                        `border:1px solid ${on ? 'var(--primary-color)' : '#cbd5e1'}; background:${on ? '#e8ecff' : '#fff'}; cursor:pointer; font-size:0.85rem;">` +
+                        `✏️ <strong>${esc(x.mesin)}</strong> - ${esc(x.mold) || '(mold belum diisi)'} <small style="color:#666;">• ${x.jam} jam terisi${on ? ' • sedang diedit' : ''}</small></button>` +
+                        `<button type="button" data-dm="${esc(x.mesin)}" data-dg="${esc(x.grp)}" aria-label="Hapus" style="width:46px; border-radius:6px; border:1px solid #fecaca; background:#fee2e2; color:#b91c1c; cursor:pointer; font-size:1rem;">🗑️</button>` +
+                        `</div>`;
+                }).join('') +
+                (kosong ? `<button type="button" data-clean="1" style="width:100%; margin-top:4px; padding:8px; border-radius:6px; border:1px solid #fecaca; background:#fff; color:#b91c1c; cursor:pointer; font-size:0.82rem;">🧹 Hapus ${kosong} entri kosong (belum ada data jam)</button>` : '');
+        }
+
+        // Hapus satu entri (mesin + mold) beserta semua jamnya; ikut terhapus di spreadsheet
+        function ljHapusGrup(mesin, grp, silent) {
+            const sc = ljScope();
+            const info = ljGroups(sc).find(x => x.mesin === mesin && x.grp === grp);
+            if (!silent && !confirm(`Hapus ${mesin} - ${(info && info.mold) || '(mold belum diisi)'} (${info ? info.jam : 0} jam terisi)?\nData ikut terhapus di spreadsheet dan tidak bisa dikembalikan.`)) return;
+            const isCurrent = mesin === sc.mesin && grp === ljGrp;
+            if (isCurrent) { clearTimeout(ljSaveTimer); ljDirty = false; }
+            const now = Date.now();
+            Object.keys(ljRows).forEach(k => {
+                const r = ljRows[k];
+                if (r.tanggal === sc.tanggal && r.shift === sc.shift && r.mesin === mesin && r.grp === grp) {
+                    ljPending[k] = { key: r.rawKey || r.key, tanggal: r.tanggal, shift: r.shift, lane: r.lane || '', mesin: r.mesin, grp: r.grp, tipe: r.tipe, jam: r.jam || '', hapus: true, updatedAt: now };
+                    delete ljRows[k];
+                }
+            });
+            ljPersist();
+            if (isCurrent) { ljGrp = ljNewGrp(); ljFreshGrp = ljGrp; ljFill(true); } else ljRenderList();
+            ljFlush();
+            if (!silent) { toast('Entri dihapus.', 'success'); setTimeout(ljRefresh, 3000); }
+        }
+
+        function ljBersihkanKosong() {
+            const sc = ljScope();
+            const kosong = ljGroups(sc).filter(x => !x.any && !(x.mesin === sc.mesin && x.grp === ljGrp));
+            if (!kosong.length) return;
+            if (!confirm(`Hapus ${kosong.length} entri yang belum punya data jam sama sekali?\nEntri yang sudah ada jam terisi tidak ikut terhapus.`)) return;
+            kosong.forEach(x => ljHapusGrup(x.mesin, x.grp, true));
+            toast(kosong.length + ' entri kosong dihapus.', 'success');
+            setTimeout(ljRefresh, 3000);
         }
 
         function ljPilihGrup(mesin, grp) {
