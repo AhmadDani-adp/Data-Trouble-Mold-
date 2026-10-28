@@ -118,14 +118,9 @@
         .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .search-box {
             background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: flex; gap: 10px; border-left: 4px solid var(--primary-color); flex: 1; min-width: 220px;
+            display: flex; gap: 10px; border-left: 4px solid var(--primary-color); flex: 1; min-width: 250px;
         }
         .search-box input { width: 100%; border: none; font-size: 1rem; outline: none; }
-        .filter-select {
-            background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border: 1px solid var(--border-color); border-left: 4px solid var(--primary-color); font-size: 0.95rem;
-            font-weight: 600; color: var(--text-dark); cursor: pointer; outline: none;
-        }
         
         .btn-add {
             background-color: var(--success-color); color: white; border: none;
@@ -141,9 +136,9 @@
             text-align: center; border-top: 3px solid var(--primary-color);
         }
         .mold-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: var(--primary-color); }
-        .mold-card h3 { color: var(--primary-color); font-size: 1.05rem; margin-bottom: 5px; word-break: break-word; }
-        .mold-card .nama-mold { font-size: 0.85rem; color: #444; font-weight: bold; }
-        .mold-card .nama-produk { font-size: 0.8rem; color: #666; margin-top: 3px; }
+        .mold-card h3 { color: var(--primary-color); font-size: 1.1rem; margin-bottom: 5px; }
+        .mold-card .nama-mold { font-size: 0.9rem; color: #444; font-weight: bold; }
+        .mold-card .nama-produk { font-size: 0.8rem; color: #888; margin-top: 3px; }
         .status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin-top: 8px; }
         .status-ready { background-color: #d4edda; color: #155724; }
         .status-repair { background-color: #f8d7da; color: #721c24; }
@@ -225,6 +220,7 @@
             .toolbar { flex-direction: column; }
         }
 
+        /* Toast notifikasi */
         .toast-wrap { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 99999;
                       display: flex; flex-direction: column; gap: 8px; width: min(92vw, 420px); pointer-events: none; }
         .toast { pointer-events: auto; padding: 12px 16px; border-radius: 8px; color: #fff; font-size: 0.9rem;
@@ -241,7 +237,7 @@
     <header>
         <div class="header-container">
             <div class="header-left">
-                <img src="data:image/png;base64,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" alt="Logo CBG - PT Cahaya Buana Intitama" class="logo-img">
+                <img src="data:image/png;base64,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" alt="Logo CBG - PT Cahaya Buana Intitama" class="logo-img">
                 <div class="header-title">
                     <h1>PT CAHAYA BUANA INTITAMA</h1>
                     <p>Divisi Maintenance Mold &bull; Section Maintenance</p>
@@ -273,22 +269,8 @@
                 <input type="text" id="inputNama" placeholder="Nama part mold...">
             </div>
             <div class="form-group">
-                <label>Tipe / Jenis Mold</label>
-                <select id="inputProduk">
-                    <option value="MCAB">MCAB</option>
-                    <option value="BCBC">BCBC</option>
-                    <option value="CLB">CLB</option>
-                    <option value="KURSI">KURSI</option>
-                    <option value="AKSESORIS">AKSESORIS</option>
-                    <option value="STOCKCASE">STOCKCASE</option>
-                    <option value="FOLDING CABINE">FOLDING CABINE</option>
-                    <option value="POLIBOX">POLIBOX</option>
-                    <option value="POLICABINE">POLICABINE</option>
-                    <option value="MEJA">MEJA</option>
-                    <option value="HOUSEWARE">HOUSEWARE</option>
-                    <option value="CCI">CCI</option>
-                    <option value="BEEBOX">BEEBOX</option>
-                </select>
+                <label>Nama Produk</label>
+                <input type="text" id="inputProduk" placeholder="Digunakan untuk produk...">
             </div>
             <div class="form-group">
                 <label>Posisi / Lokasi Rak</label>
@@ -356,33 +338,18 @@
         <div id="view-home" class="hidden">
             <div class="toolbar">
                 <div class="search-box">
-                    <input type="text" id="searchInput" onkeyup="filterMold()" placeholder="🔍 Cari ID, Nama Mold, atau Tipe...">
+                    <input type="text" id="searchInput" onkeyup="filterMold()" placeholder="🔍 Cari ID, Nama Mold, atau Produk...">
                 </div>
-                <select id="filterType" class="filter-select" onchange="filterMold()">
-                    <option value="">📂 Semua Tipe Mold</option>
-                    <option value="MCAB">MCAB</option>
-                    <option value="BCBC">BCBC</option>
-                    <option value="CLB">CLB</option>
-                    <option value="KURSI">KURSI</option>
-                    <option value="AKSESORIS">AKSESORIS</option>
-                    <option value="STOCKCASE">STOCKCASE</option>
-                    <option value="FOLDING CABINE">FOLDING CABINE</option>
-                    <option value="POLIBOX">POLIBOX</option>
-                    <option value="POLICABINE">POLICABINE</option>
-                    <option value="MEJA">MEJA</option>
-                    <option value="HOUSEWARE">HOUSEWARE</option>
-                    <option value="CCI">CCI</option>
-                    <option value="BEEBOX">BEEBOX</option>
-                </select>
                 <button class="btn-add" onclick="openModal()">+ Tambah Asset Mold</button>
             </div>
 
-            <h2 style="margin-bottom: 15px; color: var(--primary-color); font-size: 1.3rem;">Daftar Asset Mold Master CBI</h2>
+            <h2 style="margin-bottom: 15px; color: var(--primary-color); font-size: 1.3rem;">Daftar Asset Mold</h2>
             <div class="mold-grid" id="moldGrid">
-                <div class="empty-state">Memuat data dari Master Mold CBI...</div>
+                <div class="empty-state">Memuat data dari Google Sheets...</div>
             </div>
         </div>
 
+        <!-- HALAMAN PERBAIKAN MOLD -->
         <div id="view-perbaikan" class="hidden">
             <button class="btn-back" onclick="showView('view-welcome')">← Beranda</button>
             <div class="card">
@@ -390,6 +357,7 @@
                 <p style="color: #666; margin-bottom: 20px;">Pilih menu di bawah untuk menambahkan laporan perbaikan baru atau memantau progres perbaikan yang sedang berjalan.</p>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                    <!-- Option 1 -->
                     <div style="background: #fff8f0; border: 2px solid #ff9800; border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
                         <div>
                             <div style="font-size: 2.5rem; margin-bottom: 10px;">📝</div>
@@ -401,6 +369,7 @@
                         </a>
                     </div>
 
+                    <!-- Option 2 -->
                     <div style="background: #f0fdf4; border: 2px solid #22c55e; border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
                         <div>
                             <div style="font-size: 2.5rem; margin-bottom: 10px;">📊</div>
@@ -413,6 +382,7 @@
                     </div>
                 </div>
 
+                <!-- Preview Progres Live -->
                 <h3 style="font-size: 1rem; color: var(--primary-color); margin-bottom: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
                     Pratinjau Progres Perbaikan Mold (Spreadsheet Live):
                 </h3>
@@ -422,6 +392,7 @@
             </div>
         </div>
 
+        <!-- HALAMAN LAPORAN OUTPUT PER JAM -->
         <div id="view-control" class="hidden">
             <button class="btn-back" onclick="showView('view-welcome')">← Beranda</button>
             <div class="card">
@@ -448,6 +419,7 @@
                 <div class="form-group">
                     <label>Nama / Nomor Mesin</label>
                     <select id="ctrlMesin">
+                        <!-- Populated dynamically -->
                     </select>
                 </div>
                 
@@ -531,6 +503,7 @@
                 <div class="form-group" style="margin-top: 25px;">
                     <label style="font-size: 1rem; color: var(--primary-color); margin-bottom: 8px; border-bottom: 2px solid var(--border-color); padding-bottom: 4px;" id="labelHourlyTitle">Jumlah Produksi Per Jam</label>
                     <div class="hourly-grid" id="hourlyGrid">
+                        <!-- Generated via JS -->
                     </div>
                 </div>
 
@@ -557,8 +530,8 @@
                 <table class="detail-table">
                     <tr><th>Nama / No. Mold</th><td id="detailNama">-</td></tr>
                     <tr><th>Status Mold</th><td id="detailStatus" style="font-weight: bold;">-</td></tr>
-                    <tr><th>Posisi / Lokasi</th><td id="detailPosisi">-</td></tr>
-                    <tr><th>Tipe Produk</th><td id="detailProduk">-</td></tr>
+                    <tr><th>Posisi / Rak</th><td id="detailPosisi">-</td></tr>
+                    <tr><th>Produk</th><td id="detailProduk">-</td></tr>
                 </table>
             </div>
 
@@ -601,363 +574,6 @@
 
         let moldDatabase = {};
         let moldLoadState = 'loading';
-
-        // DATA MASTER MOULD CBI PER TIPE (NAMA MOLD & TYPE)
-        const MASTER_MOULD_DATA = [
-            // --- MCAB ---
-            { mold: "BACK WALL 1.3 L MINICAB - 2A", type: "MCAB" },
-            { mold: "BACK WALL 1,3 MINICAB - 2A", type: "MCAB" },
-            { mold: "BACK WALL 31 L MINICAB - 2A", type: "MCAB" },
-            { mold: "BACK WALL 31 L MINICAB - 2B", type: "MCAB" },
-            { mold: "BACK WALL MINICAB-2A", type: "MCAB" },
-            { mold: "BACK WALL MINICAB - 2B", type: "MCAB" },
-            { mold: "BADAN LACI 1,3 L MCAB-1A", type: "MCAB" },
-            { mold: "BDL 1.3 MCAB - 1A", type: "MCAB" },
-            { mold: "COVER CANAL ENGSEL MINICAB-4A", type: "MCAB" },
-            { mold: "COVER CANAL POLOS / ENGSEL MINICAB - 4B", type: "MCAB" },
-            { mold: "COVER CANAL POLOS / ENGSEL MINICAB-4C", type: "MCAB" },
-            { mold: "COVER CANAL POLOS/ENGSEL MINICAB-4D", type: "MCAB" },
-            { mold: "COVER CANAL POLOS & ENGSEL MINICAB-4A", type: "MCAB" },
-            { mold: "COVER CANAL POLOS & ENGSEL MINICAB-4C", type: "MCAB" },
-            { mold: "DOP HAMBALAN MINICAB - 4A", type: "MCAB" },
-            { mold: "DOP HAMBALAN MINICAB - 8A", type: "MCAB" },
-            { mold: "DOP SOCKET PINTU MCAB - 4A", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MCAB 3T-1A", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MCAB 3T - 1B", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MCAB 3T - 1C", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MCAB 3T TANPA EMBLEM-1A", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MCAB 3T TANPA EMBLEM-1B", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MCAB 3T TANPA EMBLEM-1C", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MCAB 4T - 1A", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MCAB L42-1A", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MCAB L42-1B", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MCAB L42-1C", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MCAB L42-1D", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MINICAB L42 - 1C", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MINICAB L42-1G", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MINICAB L48 - 10", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MINICAB L48-1D", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MINICAB L48 - 1E", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MINICAB L48 - 1F", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MINICAB L48 (EMBLEM) - 1A", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MINICAB L48 TANPA EMBLEM-1A", type: "MCAB" },
-            { mold: "HAMBALAN ATAS MINICAB L48 TANPA EMBLEM-1C", type: "MCAB" },
-            { mold: "HAMBALAN ENGSEL CERMIN MCAB L42-1A", type: "MCAB" },
-            { mold: "HAMBALAN ENGSEL CERMIN MCAB L42-1C", type: "MCAB" },
-            { mold: "HAMBALAN ENGSEL CERMIN MCAB L42-1D", type: "MCAB" },
-            { mold: "HAMBALAN ENGSEL CERMIN MINICAB L42-1G", type: "MCAB" },
-            { mold: "HAMBALAN ENGSEL MINICAB 3T1A", type: "MCAB" },
-            { mold: "HAMBALAN ENGSEL MINICAB 3T-1C", type: "MCAB" },
-            { mold: "HAMBALAN GANTUNG ENGSEL MCAB 3T - 1A", type: "MCAB" },
-            { mold: "HAMBALAN GANTUNG ENGSEL MCAB 3T (STOPPER) - 1A", type: "MCAB" },
-            { mold: "HAMBALAN GANTUNG ENGSEL MINICAB 3T STOPPER (L) 1A", type: "MCAB" },
-            { mold: "HAMBALAN GANTUNG PISAH MINICAB 3T STOPPER (L) - 1A", type: "MCAB" },
-            { mold: "HAMBALAN GANTUNG PISAH MINICAB 3T STOPPER (L) - 1B", type: "MCAB" },
-            { mold: "HAMBALAN GANTUNG PISAH MINICAB 3T STOPPER (L/R) - 1A", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MCAB 3T - 1A", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MCAB 3T - 1C", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MCAB L42-1A", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MCAB L48 4T - 1A", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L42-1C", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L42-1D", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48-1A", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48-1C", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48 - 1E", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48-1F", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48 (TANPA STOPPER) - 1D", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48 STOPPER (L) - 1A", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48 STOPPER (L) - 1C", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48 STOPPER (L) - 1D", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48 STOPPER (L) - 1F", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48 STOPPER (R) - 1A", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48 STOPPER (R) - 1C", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48 STOPPER (R) - 1D", type: "MCAB" },
-            { mold: "HAMBALAN PISAH MINICAB L48 STOPPER (R) - 1E", type: "MCAB" },
-            { mold: "HAMBALAN SAMBUNG MCAB 3T - 1A", type: "MCAB" },
-            { mold: "HAMBALAN SAMBUNG MCAB 3T-1B", type: "MCAB" },
-            { mold: "HAMBALAN SAMBUNG MCAB 3T1C", type: "MCAB" },
-            { mold: "HAMBALAN SAMBUNG MCAB L42-1A", type: "MCAB" },
-            { mold: "HAMBALAN SAMBUNG MCAB L42-1B", type: "MCAB" },
-            { mold: "HAMBALAN SAMBUNG MCAB L48 4T-1A", type: "MCAB" },
-            { mold: "HAMBALAN SAMBUNG MINICAB-1A", type: "MCAB" },
-            { mold: "HAMBALAN SAMBUNG MINICAB L42-1C", type: "MCAB" },
-            { mold: "HAMBALAN SAMBUNG MINICAB L42-1D", type: "MCAB" },
-            { mold: "HAMBALAN SAMBUNG MINICAB L48-1D", type: "MCAB" },
-            { mold: "HANDLE FLAT PINTU 66 MCAB-4A", type: "MCAB" },
-            { mold: "HANDLE FLAT PINTU 66 MCAB-4B", type: "MCAB" },
-            { mold: "HANDLE SABIT MINICAB-4A", type: "MCAB" },
-            { mold: "HANDLE TTP LACI FLAT-4A", type: "MCAB" },
-            { mold: "HINGE & STOPER MINICAB - 8A", type: "MCAB" },
-            { mold: "HOOK MCAB 8A", type: "MCAB" },
-            { mold: "KAKI 5,5 LURUS MCAB 2A", type: "MCAB" },
-            { mold: "KAKI 5,5 SIKU MCAB - 2A", type: "MCAB" },
-            { mold: "KAKI 5,5 SIKU MCAB-4A", type: "MCAB" },
-            { mold: "MIDDLE WALL 1,3 MCAB L48-1A", type: "MCAB" },
-            { mold: "MIDDLE WALL 1,3 MCAB L48-2A", type: "MCAB" },
-            { mold: "MIDDLE WALL MINICAB L48-1A", type: "MCAB" },
-            { mold: "MIDDLE WALL MINICAB L48 - 1B", type: "MCAB" },
-            { mold: "MIDDLE WALL MINICAB L48-1C", type: "MCAB" },
-            { mold: "MIDDLE WALL MINICAB L48-1D", type: "MCAB" },
-            { mold: "PINTU 31 FLAT - 2A", type: "MCAB" },
-            { mold: "PINTU 31 FLAT - 2B", type: "MCAB" },
-            { mold: "PINTU 31 ION - 2A", type: "MCAB" },
-            { mold: "PINTU 31 ION - 2B", type: "MCAB" },
-            { mold: "PINTU 31 ION - 2C", type: "MCAB" },
-            { mold: "PINTU 66 FLAT MINICAB-1A", type: "MCAB" },
-            { mold: "PINTU 66 FLAT MINICAB - 1B", type: "MCAB" },
-            { mold: "PINTU 66 FLAT MINICAB - 1C", type: "MCAB" },
-            { mold: "PINTU 66 FLAT MINICAB - 1D", type: "MCAB" },
-            { mold: "PINTU 66 FLAT MINICAB-1E", type: "MCAB" },
-            { mold: "PINTU 66 ION - 1A", type: "MCAB" },
-            { mold: "PINTU 66 ION-1B", type: "MCAB" },
-            { mold: "PINTU 66 ION MCAB - 1D", type: "MCAB" },
-            { mold: "PINTU 66 ION MCAB1E", type: "MCAB" },
-            { mold: "PINTU 66 LAMPION MINICAB - 1A", type: "MCAB" },
-            { mold: "PINTU 66 POLLY ION-1A", type: "MCAB" },
-            { mold: "PINTU 66 POLLY MCAB-1D", type: "MCAB" },
-            { mold: "PINTU 66 POLLY MINICAB - 1A", type: "MCAB" },
-            { mold: "SEPATU MINICAB - 4A", type: "MCAB" },
-            { mold: "SEPATU MINICAB - 4B", type: "MCAB" },
-            { mold: "SIDE WALL 1.3 MINICAB L42-2B", type: "MCAB" },
-            { mold: "SIDE WALL 1,3 MINICAB L48-2A", type: "MCAB" },
-            { mold: "SIDE WALL MINICAB - 2A", type: "MCAB" },
-            { mold: "SIDE WALL MINICAB-2B", type: "MCAB" },
-            { mold: "SIDE WALL MINICAB L42-2C", type: "MCAB" },
-            { mold: "SIDE WALL MINICAB L48-2B", type: "MCAB" },
-            { mold: "SIDE WALL MINICAB L48-2C", type: "MCAB" },
-            { mold: "SIDE WALL MINICAB L48-2D", type: "MCAB" },
-            { mold: "SOCKET BW 2B", type: "MCAB" },
-            { mold: "SOCKET PINTU MCAB-2A", type: "MCAB" },
-            { mold: "TTP LACI 1.3 BERLI-1A", type: "MCAB" },
-            { mold: "TTP LACI 1.3 FLAT-1A", type: "MCAB" },
-            { mold: "TTP LACI 1.3 ION - 1A", type: "MCAB" },
-            { mold: "TTP LACI 1.3 L BERLI-2A", type: "MCAB" },
-            { mold: "TTP LACI 1.3 LION - 2A", type: "MCAB" },
-            { mold: "TTP LACI 1.3 L FLAT 1A", type: "MCAB" },
-
-            // --- BCBC ---
-            { mold: "SW 2 bcbc 1A", type: "BCBC" },
-            { mold: "SW X bcbc 1E", type: "BCBC" },
-            { mold: "Badan Laci 2 Delta 1C****", type: "BCBC" },
-            { mold: "BADAN LACI GANTUNG-1A", type: "BCBC" },
-            { mold: "BADAN LACI GANTUNG-2A", type: "BCBC" },
-            { mold: "BADAN SEDANG BBF 2", type: "BCBC" },
-            { mold: "BDL 2 Delta 1A", type: "BCBC" },
-            { mold: "BW 1 BCBC - 1F", type: "BCBC" },
-            { mold: "BW 1 KECIL-1A", type: "BCBC" },
-            { mold: "Bw 2 Bcbc 1A***", type: "BCBC" },
-            { mold: "Bw 2 Bcbc 1C***", type: "BCBC" },
-            { mold: "BW 2 BCBC KOTAK 1C", type: "BCBC" },
-            { mold: "BW D BCBC KOTAK 1C", type: "BCBC" },
-            { mold: "Bw D DSC 1A***", type: "BCBC" },
-            { mold: "BW S bcbc 2A", type: "BCBC" },
-            { mold: "BW S BCBC 2B", type: "BCBC" },
-            { mold: "Bw s bcbc 2C", type: "BCBC" },
-            { mold: "BW S KECIL-1A", type: "BCBC" },
-            { mold: "BW X bcbc 1A", type: "BCBC" },
-            { mold: "Bw X Bcbc 1F***", type: "BCBC" },
-            { mold: "BW X BCBC SAMBUNG 1A", type: "BCBC" },
-            { mold: "BW X BCBC SAMBUNG 1G", type: "BCBC" },
-            { mold: "BW X KECIL BCBC-1A", type: "BCBC" },
-            { mold: "COVER CANAL POLOS 4T - 2A", type: "BCBC" },
-            { mold: "COVER CANAL STOPER 4T - 2A", type: "BCBC" },
-            { mold: "COVER TIANG BW 66-2A", type: "BCBC" },
-            { mold: "Dinding Belakang 27 1A", type: "BCBC" },
-            { mold: "DINDING SAMPING 66-1D", type: "BCBC" },
-            { mold: "DINDING SAMPING 66 1A", type: "BCBC" },
-            { mold: "DINDING SAMPING 66 1C", type: "BCBC" },
-            { mold: "DINDING SAMPING 66 1E", type: "BCBC" },
-            { mold: "Hamb. Sambung bcbc 1E", type: "BCBC" },
-            { mold: "Hamb. Sambung bcbc 1F", type: "BCBC" },
-            { mold: "HAMBALAN 3P CABSUL (GAS) ATAS-1A", type: "BCBC" },
-            { mold: "HAMBALAN 3P CABSUL (GAS) GANTUNG-1A", type: "BCBC" },
-            { mold: "HAMBALAN 3P CABSUL BAWAH - 1A", type: "BCBC" },
-            { mold: "HAMBALAN 4T CABRO ATAS - 1A", type: "BCBC" },
-            { mold: "HAMBALAN 4T CABRO BAWAH - 1A", type: "BCBC" },
-            { mold: "HAMBALAN 4T CABRO GANTUNG-1A", type: "BCBC" },
-            { mold: "HAMBALAN 4T CABRO SAMBUNG TEBS - 1A", type: "BCBC" },
-            { mold: "HAMBALAN 4T CABSUL ATAS - 1A", type: "BCBC" },
-            { mold: "HAMBALAN 4T CABSUL BAWAH-1A", type: "BCBC" },
-            { mold: "HAMBALAN ATAS BC3 1A", type: "BCBC" },
-            { mold: "HAMBALAN ATAS BCCS 1A", type: "BCBC" },
-            { mold: "Hambalan Atas BCS 1A", type: "BCBC" },
-            { mold: "HAMBALAN BAWAH BC3 - 1A", type: "BCBC" },
-            { mold: "Hambalan Bcbc 1A***", type: "BCBC" },
-            { mold: "Hambalan bcbc 1B", type: "BCBC" },
-            { mold: "Hambalan Bcbc 1C***", type: "BCBC" },
-            { mold: "Hambalan Bcbc 1F***", type: "BCBC" },
-            { mold: "HAMBALAN BCBC DH 1D", type: "BCBC" },
-            { mold: "HAMBALAN CERMIN ENGSEL (PLEC) - 1B", type: "BCBC" },
-            { mold: "Hambalan Cermin Engsel 1A", type: "BCBC" },
-            { mold: "HAMBALAN CERMIN ENGSEL 1C", type: "BCBC" },
-            { mold: "Hambalan Engsel BCBC 1A", type: "BCBC" },
-            { mold: "Hambalan Engsel BCBC 1B", type: "BCBC" },
-            { mold: "HAMBALAN GANTUNG BC3 - 1A", type: "BCBC" },
-            { mold: "HAMBALAN PISAH 50 BCCS 1B", type: "BCBC" },
-            { mold: "HAMBALAN PISAH BCBC", type: "BCBC" },
-            { mold: "Hambalan Sambung BCS 1A", type: "BCBC" },
-            { mold: "Handle Tutup Laci Rotan Kapuas/SRS - 4A", type: "BCBC" },
-            { mold: "HANGER BESAR (1)", type: "BCBC" },
-            { mold: "KAKI 5,5 LURUS - 2A", type: "BCBC" },
-            { mold: "KAKI 5.5 SIKU - 2A", type: "BCBC" },
-            { mold: "Kaki bcbc 2A", type: "BCBC" },
-            { mold: "Kaki bcbc 2C", type: "BCBC" },
-            { mold: "PINTU 1 FLAT - 1A", type: "BCBC" },
-            { mold: "PINTU 1 U BIT PAPAN 1A", type: "BCBC" },
-            { mold: "PINTU 1 UTUH ROTAN KAPUAS/POLLY 1A", type: "BCBC" },
-            { mold: "PINTU 2U-BIT PAPAN 1A", type: "BCBC" },
-            { mold: "PINTU 2U-BIT POLLY 1A", type: "BCBC" },
-            { mold: "PINTU 3 FLAT 1A", type: "BCBC" },
-            { mold: "PINTU 6 U BIT PAPAN 1A", type: "BCBC" },
-            { mold: "PINTU 6 U BIT POLLY 1A", type: "BCBC" },
-            { mold: "PINTU 60 CABSUL PAPAN 1A", type: "BCBC" },
-            { mold: "PINTU 80 FLAT - 1A", type: "BCBC" },
-            { mold: "SW 6 BCBC KOTAK GANTUNGAN 1A", type: "BCBC" },
-            { mold: "TIANG BC 80 PAPAN-1A", type: "BCBC" },
-            { mold: "TIANG BW 2A", type: "BCBC" },
-
-            // --- CLB ---
-            { mold: "BACK WALL 23 CLB-2A", type: "CLB" },
-            { mold: "BACK WALL 23 CLB-2B", type: "CLB" },
-            { mold: "BACK WALL 23 CLB - 2C", type: "CLB" },
-            { mold: "HAMBALAN ATAS CLB 1-1A", type: "CLB" },
-            { mold: "HAMBALAN ATAS CLB2", type: "CLB" },
-            { mold: "HAMBALAN ATAS CLB3-1A", type: "CLB" },
-            { mold: "HAMBALAN SAMBUNG CLB 1-2A", type: "CLB" },
-            { mold: "HAMBALAN SAMBUNG CLB 1 1A", type: "CLB" },
-            { mold: "HAMBALAN SAMBUNG CLB 2-1A", type: "CLB" },
-            { mold: "HAMBALAN SAMBUNG CLB 3 1B", type: "CLB" },
-            { mold: "KAKI CLB-4A", type: "CLB" },
-            { mold: "MIDDLE WALL CLB - 2A", type: "CLB" },
-            { mold: "MIDDLE WALL CLB-2B", type: "CLB" },
-            { mold: "PINTU 25 CLB - 2A", type: "CLB" },
-            { mold: "PINTU 25 CLB - 2B", type: "CLB" },
-            { mold: "PINTU 25 LOCKER 1A", type: "CLB" },
-            { mold: "RAK CLB 2A", type: "CLB" },
-            { mold: "SIDE WALL 23 CLB - 2B", type: "CLB" },
-            { mold: "TARIKAN CLB - 4A", type: "CLB" },
-
-            // --- KURSI ---
-            { mold: "101 P", type: "KURSI" },
-            { mold: "101 Q", type: "KURSI" },
-            { mold: "102 A", type: "KURSI" },
-            { mold: "102 B", type: "KURSI" },
-            { mold: "208 J", type: "KURSI" },
-            { mold: "303 K", type: "KURSI" },
-            { mold: "304 B", type: "KURSI" },
-            { mold: "909 D", type: "KURSI" },
-            { mold: "BIG 2R3", type: "KURSI" },
-            { mold: "BIG 678 HEALING", type: "KURSI" },
-            { mold: "BIG BROSS 832 P", type: "KURSI" },
-            { mold: "BIG PW 678 ROTAN", type: "KURSI" },
-            { mold: "BIG RICH 811", type: "KURSI" },
-            { mold: "BIG-3R3", type: "KURSI" },
-            { mold: "BIGBROS 833 S", type: "KURSI" },
-            { mold: "GW 732", type: "KURSI" },
-            { mold: "KRS 8R3 ARM E", type: "KURSI" },
-            { mold: "Kursi 101 T", type: "KURSI" },
-            { mold: "KURSI 232 P F", type: "KURSI" },
-            { mold: "KURSI 632 PB", type: "KURSI" },
-            { mold: "KURSI KuHaPe", type: "KURSI" },
-            { mold: "KURSI TANGAN 809 B", type: "KURSI" },
-            { mold: "KURSI SULTAN 739 HORI 1A", type: "KURSI" },
-            { mold: "KURSI TCC 500 E", type: "KURSI" },
-
-            // --- AKSESORIS ---
-            { mold: "Ass List Naplast 6A", type: "AKSESORIS" },
-            { mold: "Ass List Naplast 6B", type: "AKSESORIS" },
-            { mold: "ASS MAHKOTA UKIRAN", type: "AKSESORIS" },
-            { mold: "Bracket Panjang 4C Big Cabin", type: "AKSESORIS" },
-            { mold: "Bracket Panjang 4D", type: "AKSESORIS" },
-            { mold: "BRACKET PANJANG 4E", type: "AKSESORIS" },
-            { mold: "Bracket Pendek 4C", type: "AKSESORIS" },
-            { mold: "BUMPER 30 ROTAN - 2A", type: "AKSESORIS" },
-            { mold: "BUMPER 78 ROTAN - 2A", type: "AKSESORIS" },
-            { mold: "COVER CANAL/POLOS-4A", type: "AKSESORIS" },
-            { mold: "DIAMOND", type: "AKSESORIS" },
-            { mold: "HANDLE COMPANEL 4A", type: "AKSESORIS" },
-            { mold: "Handle Eagle 8A", type: "AKSESORIS" },
-            { mold: "HANDLE SABIT 15 S 4A", type: "AKSESORIS" },
-            { mold: "HANGER 3037", type: "AKSESORIS" },
-            { mold: "HINGE UNIVERSAL - 4A", type: "AKSESORIS" },
-            { mold: "LOGO NAPOLLY (LURUS) - 16A", type: "AKSESORIS" },
-            { mold: "MAHKOTA ATAS 61-1A", type: "AKSESORIS" },
-
-            // --- STOCKCASE ---
-            { mold: "Badan Laci 1,7 Beta Eagle 1F***", type: "STOCKCASE" },
-            { mold: "BADAN LACI 1.7 BETA EAGLE 1G", type: "STOCKCASE" },
-            { mold: "Badan Laci 2 Alpha Eagle 1J***", type: "STOCKCASE" },
-            { mold: "Badan Laci 2 Alpha Plast 1G****", type: "STOCKCASE" },
-            { mold: "Badan Laci 2 Alpha Sfc2 1D***", type: "STOCKCASE" },
-            { mold: "BADAN LACI 2 DELTA 1D", type: "STOCKCASE" },
-            { mold: "Landasan Beta / o Eagle 2c", type: "STOCKCASE" },
-            { mold: "LANDASAN BETA NCS EAGLE - 1A", type: "STOCKCASE" },
-            { mold: "TLC 2 ALPHA ALACITAN - 1A", type: "STOCKCASE" },
-
-            // --- FOLDING CABINE ---
-            { mold: "BINGKAI 29 FOLDING CABINE - 1A", type: "FOLDING CABINE" },
-            { mold: "BINGKAI 67 FOLDING CABINE - 2A", type: "FOLDING CABINE" },
-            { mold: "DINDING BELAKANG FOLDING CABINE - 1A", type: "FOLDING CABINE" },
-            { mold: "DINDING SAMPING FOLDING CABINE - 1A", type: "FOLDING CABINE" },
-            { mold: "PINTU 29 FOLDING CABINE - 1A", type: "FOLDING CABINE" },
-
-            // --- POLIBOX ---
-            { mold: "BINGKAI DINDING POLIBOX - 1A", type: "POLIBOX" },
-            { mold: "BINGKAI DINDING POLIBOX - 1B", type: "POLIBOX" },
-            { mold: "BINGKAI DINDING POLIBOX - 1C", type: "POLIBOX" },
-            { mold: "DINDING BELAKANG POLIBOX - 1A", type: "POLIBOX" },
-            { mold: "DINDING BELAKANG POLIBOX - 1B", type: "POLIBOX" },
-
-            // --- POLICABINE ---
-            { mold: "BINGKAI PINTU 51 ATAS - 2A", type: "POLICABINE" },
-            { mold: "BINGKAI PINTU 51 ATAS BAWAH - 2A", type: "POLICABINE" },
-            { mold: "RAK POLICABINE", type: "POLICABINE" },
-
-            // --- MEJA ---
-            { mold: "Mapan 45", type: "MEJA" },
-            { mold: "MAPAN 46", type: "MEJA" },
-            { mold: "MAPAN 75", type: "MEJA" },
-            { mold: "Meja 7550 ***", type: "MEJA" },
-
-            // --- HOUSEWARE ---
-            { mold: "WALL RACK", type: "HOUSEWARE" },
-            { mold: "TUTUP BELAKANG TWIN BSL 1A", type: "HOUSEWARE" },
-            { mold: "TUTUP SAMPING LIPAT TWIN BSL 2A", type: "HOUSEWARE" },
-            { mold: "PINTU TWIN BSL 2A", type: "HOUSEWARE" },
-
-            // --- CCI ---
-            { mold: "DOP CCI-8A", type: "CCI" },
-            { mold: "DOP HAMBALAN CCI8A", type: "CCI" },
-            { mold: "HAMBALAN ATAS 2 PCCI-1A", type: "CCI" },
-            { mold: "SIDE WALL 2 CCI", type: "CCI" },
-            { mold: "COVER CANAL POLOS CCI-4A", type: "CCI" },
-
-            // --- BEEBOX ---
-            { mold: "Rak tengah BEEBOX - 1A", type: "BEEBOX" },
-            { mold: "ASS KOMP BEEBOX - 9A", type: "BEEBOX" },
-            { mold: "SW BEEBOX - 2A", type: "BEEBOX" },
-            { mold: "BW BEEBOX", type: "BEEBOX" }
-        ];
-
-        function initMasterMoldDatabase() {
-            MASTER_MOULD_DATA.forEach(item => {
-                const id = item.mold;
-                if (!moldDatabase[id]) {
-                    moldDatabase[id] = {
-                        id: id,
-                        nama: item.mold,
-                        produk: item.type,
-                        posisi: "-",
-                        status: "Siap Produksi",
-                        riwayatTerakhir: {
-                            tanggal: "-", jam: "-", mesin: "-", jenis: "-", lokasi: "-", bagian: "-",
-                            penyebab: "-", detailPenyebab: "-", tindakan: "-", finishing: "-", durasi: "-",
-                            hasil: "-", berulang: "-", jumlah: "-", shot: "-", pic: "-", catatan: "-"
-                        }
-                    };
-                }
-            });
-        }
 
         function esc(v) {
             return String(v === null || v === undefined ? '' : v).replace(/[&<>"']/g, c => (
@@ -1104,8 +720,9 @@
         }
 
         function loadDataFromSheet() {
-            initMasterMoldDatabase();
-            renderMoldGrid();
+            if (Object.keys(moldDatabase).length === 0) {
+                document.getElementById('moldGrid').innerHTML = '<div class="empty-state">Memuat data...</div>';
+            }
 
             const ctrl = new AbortController();
             const timer = setTimeout(() => ctrl.abort(), 20000);
@@ -1118,13 +735,14 @@
                 .then(data => {
                     if (!Array.isArray(data)) throw new Error('Format data tidak valid');
                     moldLoadState = 'ok';
+                    moldDatabase = {};
                     data.forEach(row => {
                         let id = row.mold || row.id;
                         if (id) {
                             moldDatabase[id] = {
                                 id: id,
-                                nama: row.nama || id,
-                                produk: row.produk || "MCAB",
+                                nama: row.nama || "-",
+                                produk: row.produk || "-",
                                 posisi: row.posisi || "-",
                                 status: row.status || "Siap Produksi",
                                 riwayatTerakhir: {
@@ -1158,9 +776,10 @@
                     }
                 })
                 .catch(err => {
-                    console.log("Menggunakan data master lokal.", err);
+                    console.log("Menggunakan data lokal offline.", err);
                     clearTimeout(timer);
                     moldLoadState = 'error';
+                    toast("Gagal memuat data dari spreadsheet. Menggunakan data lokal.", "error");
                     renderMoldGrid();
                 });
         }
@@ -1170,6 +789,7 @@
             document.getElementById('modalTambah').classList.add('hidden');
             document.getElementById('inputID').value = '';
             document.getElementById('inputNama').value = '';
+            document.getElementById('inputProduk').value = '';
             document.getElementById('inputPosisi').value = '';
         }
 
@@ -1181,8 +801,8 @@
             const newData = {
                 id: id,
                 mold: id,
-                nama: document.getElementById('inputNama').value || id,
-                produk: document.getElementById('inputProduk').value || "MCAB",
+                nama: document.getElementById('inputNama').value || "-",
+                produk: document.getElementById('inputProduk').value || "-",
                 posisi: document.getElementById('inputPosisi').value || "-",
                 status: document.getElementById('inputStatus').value
             };
@@ -1196,10 +816,9 @@
                 body: JSON.stringify(newData)
             }).then(() => {
                 savingMold(false);
-                moldDatabase[id] = newData;
-                renderMoldGrid();
-                toast("Data berhasil disimpan!");
+                toast("Data berhasil disimpan ke Spreadsheet!");
                 closeModal();
+                setTimeout(loadDataFromSheet, 1500);
             }).catch(err => {
                 savingMold(false);
                 toast("Terjadi kesalahan saat menyimpan.");
@@ -1218,6 +837,9 @@
             }
         }
 
+        // ===== Laporan Output Per Jam =====
+        // Data diikat ke tanggal + shift + mesin + "grup" (id internal), BUKAN ke nama mold yang diketik.
+        // Jadi nama mold boleh diubah/diperbaiki, dan data tetap muncul lagi setelah refresh.
         const LAPORAN_URL = "https://script.google.com/macros/s/AKfycbzDDdMBDexjpAUgsQOcHRRwQdEmWEmSFTJl91I8ykjaXs_f0BJMU5xYiGHJ2EN8Ns7G/exec";
         const LJ_FIELDS = { ct: 'ctrlCT', target: 'ctrlTarget', mold: 'ctrlMold', produk: 'ctrlProduk', kondisi: 'ctrlKondisi',
             permasalahan: 'ctrlPermasalahan', selangHidrolik: 'ctrlSelangHidrolik', baut: 'ctrlBaut', hidrolik: 'ctrlHidrolik', limitSwitch: 'ctrlLimitSwitch' };
@@ -1240,6 +862,7 @@
             if (el) { el.textContent = msg; el.style.color = bad ? '#b45309' : '#15803d'; }
         }
 
+        // Samakan format baris (data lama maupun dari spreadsheet) -> pastikan ada grup & jam rapi
         function ljNorm(r) {
             if (r.jam) r.jam = normJam(r.jam);
             const orig = r.key;
@@ -1250,6 +873,7 @@
                 if (!r.grp) r.grp = p[3];
                 r.key = p.join('|');
                 if (r.key !== orig && !r.rawKey) r.rawKey = orig;
+                // key selalu teks utuh, jadi dipakai sebagai sumber tanggal/shift/mesin/jam (kolom spreadsheet bisa berubah format)
                 r.tanggal = p[0]; r.shift = p[1]; r.mesin = p[2];
                 if (p[4] !== 'META') r.jam = p[4];
             }
@@ -1267,9 +891,10 @@
                     if (laneMachines[o.lane].includes(o.mesin)) ljEl('ctrlMesin').value = o.mesin;
                 }
                 if (['Pagi', 'Sore', 'Malam'].includes(o.shift)) { ljEl('ctrlShift').value = o.shift; updateShiftHours(); }
-            } catch (e) { }
+            } catch (e) { /* abaikan */ }
         }
 
+        // Kumpulkan grup (mesin + mold) pada tanggal+shift terpilih
         function ljGroups(sc) {
             const g = {};
             Object.values(ljRows).forEach(r => {
@@ -1335,6 +960,7 @@
             window.addEventListener('online', () => ljRefresh());
         }
 
+        // Simpan isi form ke draf lokal + antrean kirim (hanya baris yang berubah, hanya jika pengguna mengetik)
         function ljSaveNow() {
             clearTimeout(ljSaveTimer);
             const sc = ljLastScope;
@@ -1378,9 +1004,10 @@
             const url = `${LAPORAN_URL}?action=laporanJam&tanggal=${encodeURIComponent(sc.tanggal)}&shift=${encodeURIComponent(sc.shift)}&_=${Date.now()}`;
             return fetch(url, { signal: ctrl.signal }).then(r => r.json()).then(d => {
                 clearTimeout(t);
-                if (!d || d.ok !== true || !Array.isArray(d.rows)) { ljStatus('❌ Spreadsheet laporan membalas format tak dikenal. Cek deployment Apps Script.', true); return; }
+                if (!d || d.ok !== true || !Array.isArray(d.rows)) { ljStatus('❌ Spreadsheet laporan membalas format tak dikenal. Cek deployment Apps Script (akses "Anyone", versi terbaru).', true); return; }
                 const remote = {};
                 d.rows.forEach(r => { ljNorm(r); remote[r.key] = r; });
+                // konfirmasi: antrean baru dihapus setelah terbaca di spreadsheet
                 Object.keys(ljPending).forEach(k => {
                     const pd = ljPending[k], rm = remote[k];
                     if (pd.hapus ? (!rm && Date.now() - pd.updatedAt > 10000) : (rm && Number(rm.updatedAt) >= Number(pd.updatedAt))) delete ljPending[k];
@@ -1395,9 +1022,10 @@
                 ljFlush();
                 const pend = Object.keys(ljPending).length;
                 ljStatus(pend ? '⏳ ' + pend + ' data menunggu konfirmasi spreadsheet...' : '✅ Tersinkron ' + new Date().toTimeString().slice(0, 5), !!pend);
-            }).catch(err => { clearTimeout(t); ljStatus('❌ Tidak bisa terhubung ke spreadsheet laporan. ' + Object.keys(ljPending).length + ' data tersimpan di HP ini.', true); });
+            }).catch(err => { clearTimeout(t); ljStatus('❌ Tidak bisa terhubung ke spreadsheet laporan (' + (err.message || err) + '). ' + Object.keys(ljPending).length + ' data tersimpan di HP ini.', true); });
         }
 
+        // Isi form dari draf. clear=true: ganti mesin/shift/tanggal -> kosongkan lalu muat data mesin itu
         function ljFill(clear) {
             const sc = ljScope();
             if (clear) {
@@ -1433,6 +1061,7 @@
             return list.sort((p, q) => ((o[p.mesin] === undefined ? 999 : o[p.mesin]) - (o[q.mesin] === undefined ? 999 : o[q.mesin])) || String(p.grp).localeCompare(String(q.grp)));
         }
 
+        // Daftar semua mesin/mold yang masuk laporan shift ini: ketuk untuk mengedit, 🗑️ untuk menghapus
         function ljRenderList() {
             const box = ljEl('ljList');
             if (!box) return;
@@ -1453,10 +1082,11 @@
                 (kosong ? `<button type="button" data-clean="1" style="width:100%; margin-top:4px; padding:8px; border-radius:6px; border:1px solid #fecaca; background:#fff; color:#b91c1c; cursor:pointer; font-size:0.82rem;">🧹 Hapus ${kosong} entri kosong (belum ada data jam)</button>` : '');
         }
 
+        // Hapus satu entri (mesin + mold) beserta semua jamnya; ikut terhapus di spreadsheet
         function ljHapusGrup(mesin, grp, silent) {
             const sc = ljScope();
             const info = ljGroups(sc).find(x => x.mesin === mesin && x.grp === grp);
-            if (!silent && !confirm(`Hapus ${mesin} - ${(info && info.mold) || '(mold belum diisi)'} (${info ? info.jam : 0} jam terisi)?`)) return;
+            if (!silent && !confirm(`Hapus ${mesin} - ${(info && info.mold) || '(mold belum diisi)'} (${info ? info.jam : 0} jam terisi)?\nData ikut terhapus di spreadsheet dan tidak bisa dikembalikan.`)) return;
             const isCurrent = mesin === sc.mesin && grp === ljGrp;
             if (isCurrent) { clearTimeout(ljSaveTimer); ljDirty = false; }
             const now = Date.now();
@@ -1477,7 +1107,7 @@
             const sc = ljScope();
             const kosong = ljGroups(sc).filter(x => !x.any && !(x.mesin === sc.mesin && x.grp === ljGrp));
             if (!kosong.length) return;
-            if (!confirm(`Hapus ${kosong.length} entri yang belum punya data jam sama sekali?`)) return;
+            if (!confirm(`Hapus ${kosong.length} entri yang belum punya data jam sama sekali?\nEntri yang sudah ada jam terisi tidak ikut terhapus.`)) return;
             kosong.forEach(x => ljHapusGrup(x.mesin, x.grp, true));
             toast(kosong.length + ' entri kosong dihapus.', 'success');
             setTimeout(ljRefresh, 3000);
@@ -1514,21 +1144,22 @@
             return t;
         }
 
+        // Simpan data saat ini, lalu siapkan form kosong untuk mold / mesin berikutnya
         function tambahMoldLain() {
             ljSaveNow();
             ljGrp = ljNewGrp(); ljFreshGrp = ljGrp;
             ljFill(true);
-            toast('Data tersimpan! Silakan isi mold berikutnya.', 'success');
+            toast('Data tersimpan! Silakan isi mold berikutnya (ganti mesin di kolom Mesin bila perlu).', 'success');
             ljEl('view-control').scrollIntoView({ behavior: 'smooth' });
         }
 
         async function kirimControlKeWA() {
             const w = window.open('about:blank', '_blank');
             ljSaveNow();
-            toast('Mengambil data terbaru...');
+            toast('Mengambil data terbaru dari semua HP...');
             await ljRefresh();
             const sc = ljScope(), txt = ljBuildReport(sc.tanggal, sc.shift);
-            if (!txt) { if (w) w.close(); toast('Belum ada data jam yang diisi!'); return; }
+            if (!txt) { if (w) w.close(); toast('Belum ada data jam yang diisi untuk shift ini!'); return; }
             const url = 'https://wa.me/?text=' + encodeURIComponent(txt);
             if (w) w.location.href = url; else window.location.href = url;
         }
@@ -1536,7 +1167,7 @@
         function cetakPDFControl() {
             ljSaveNow();
             const sc = ljScope(), txt = ljBuildReport(sc.tanggal, sc.shift);
-            if (!txt) { toast('Belum ada data jam yang diisi!'); return; }
+            if (!txt) { toast('Belum ada data jam yang diisi untuk shift ini!'); return; }
             ljEl('printReportContainer').innerText = txt;
             window.print();
         }
@@ -1599,7 +1230,7 @@
             const keys = Object.keys(moldDatabase);
 
             if (keys.length === 0) {
-                grid.innerHTML = `<div class="empty-state">Belum ada data Mold di Spreadsheet. Klik "+ Tambah Asset Mold" di atas.</div>`;
+                grid.innerHTML = `<div class="empty-state">${moldLoadState === 'error' ? 'Gagal memuat data dari spreadsheet. Periksa koneksi lalu muat ulang halaman.' : 'Belum ada data Mold di Spreadsheet. Klik "+ Tambah Asset Mold" di atas.'}</div>`;
             } else {
                 keys.forEach(id => {
                     const item = moldDatabase[id];
@@ -1619,7 +1250,7 @@
                     card.innerHTML = `
                         <h3>${esc(item.id)}</h3>
                         <p class="nama-mold">${esc(item.nama)}</p>
-                        <p class="nama-produk">Tipe: <strong>${esc(item.produk)}</strong></p>
+                        <p class="nama-produk">Prd: ${esc(item.produk)}</p>
                         <span class="status-badge ${statusClass}">${esc(item.status)}</span>
                     `;
                     grid.appendChild(card);
@@ -1633,18 +1264,13 @@
 
         function filterMold() {
             const input = document.getElementById('searchInput').value.toUpperCase();
-            const typeVal = document.getElementById('filterType') ? document.getElementById('filterType').value.toUpperCase() : '';
             const cards = document.getElementsByClassName('mold-card');
-            
             for (let i = 0; i < cards.length; i++) {
                 const idMold = cards[i].getElementsByTagName('h3')[0].innerText.toUpperCase();
                 const namaMold = cards[i].getElementsByClassName('nama-mold')[0].innerText.toUpperCase();
                 const namaProduk = cards[i].getElementsByClassName('nama-produk')[0].innerText.toUpperCase();
                 
-                const matchSearch = idMold.includes(input) || namaMold.includes(input) || namaProduk.includes(input);
-                const matchType = !typeVal || namaProduk.includes(typeVal);
-
-                if (matchSearch && matchType) {
+                if (idMold.includes(input) || namaMold.includes(input) || namaProduk.includes(input)) {
                     cards[i].style.display = "";
                 } else {
                     cards[i].style.display = "none";
@@ -1665,24 +1291,24 @@
             document.getElementById('detailPosisi').innerText = data.posisi;
             document.getElementById('detailProduk').innerText = data.produk;
 
-            const r = data.riwayatTerakhir || {};
-            document.getElementById('dtTanggal').innerText = r.tanggal || "-";
-            document.getElementById('dtJam').innerText = r.jam || "-";
-            document.getElementById('dtMesin').innerText = r.mesin || "-";
-            document.getElementById('dtJenis').innerText = r.jenis || "-";
-            document.getElementById('dtLokasi').innerText = r.lokasi || "-";
-            document.getElementById('dtBagian').innerText = r.bagian || "-";
-            document.getElementById('dtPenyebab').innerText = r.penyebab || "-";
-            document.getElementById('dtDetailPenyebab').innerText = r.detailPenyebab || "-";
-            document.getElementById('dtTindakan').innerText = r.tindakan || "-";
-            document.getElementById('dtFinishing').innerText = r.finishing || "-";
-            document.getElementById('dtDurasi').innerText = r.durasi || "-";
-            document.getElementById('dtHasil').innerText = r.hasil || "-";
-            document.getElementById('dtBerulang').innerText = r.berulang || "-";
-            document.getElementById('dtJumlah').innerText = r.jumlah || "-";
-            document.getElementById('dtShot').innerText = r.shot || "-";
-            document.getElementById('dtPic').innerText = r.pic || "-";
-            document.getElementById('dtCatatan').innerText = r.catatan || "-";
+            const r = data.riwayatTerakhir;
+            document.getElementById('dtTanggal').innerText = r.tanggal;
+            document.getElementById('dtJam').innerText = r.jam;
+            document.getElementById('dtMesin').innerText = r.mesin;
+            document.getElementById('dtJenis').innerText = r.jenis;
+            document.getElementById('dtLokasi').innerText = r.lokasi;
+            document.getElementById('dtBagian').innerText = r.bagian;
+            document.getElementById('dtPenyebab').innerText = r.penyebab;
+            document.getElementById('dtDetailPenyebab').innerText = r.detailPenyebab;
+            document.getElementById('dtTindakan').innerText = r.tindakan;
+            document.getElementById('dtFinishing').innerText = r.finishing;
+            document.getElementById('dtDurasi').innerText = r.durasi;
+            document.getElementById('dtHasil').innerText = r.hasil;
+            document.getElementById('dtBerulang').innerText = r.berulang;
+            document.getElementById('dtJumlah').innerText = r.jumlah;
+            document.getElementById('dtShot').innerText = r.shot;
+            document.getElementById('dtPic').innerText = r.pic;
+            document.getElementById('dtCatatan').innerText = r.catatan;
 
             document.getElementById('btnGoogleForm').href = `https://forms.google.com`; 
 
