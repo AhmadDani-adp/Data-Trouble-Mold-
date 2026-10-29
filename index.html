@@ -197,20 +197,8 @@
         <div class="modal-box">
             <h2>Tambah Data Asset Mold</h2>
             <div class="form-group">
-                <label>ID Mold (Contoh: MOLD-001)</label>
-                <input type="text" id="inputID" placeholder="MOLD-...">
-            </div>
-            <div class="form-group">
                 <label>Nama Mold</label>
-                <input type="text" id="inputNama" placeholder="Nama part mold...">
-            </div>
-            <div class="form-group">
-                <label>Nama Produk</label>
-                <input type="text" id="inputProduk" placeholder="Digunakan untuk produk...">
-            </div>
-            <div class="form-group">
-                <label>Posisi / Lokasi Rak</label>
-                <input type="text" id="inputPosisi" placeholder="Contoh: Rak A-1">
+                <input type="text" id="inputID" placeholder="Contoh: KURSI tcc 500 Hori">
             </div>
             <div class="form-group">
                 <label>Status Saat Ini</label>
@@ -300,7 +288,7 @@
         <div id="view-home" class="hidden">
             <div class="toolbar">
                 <div class="search-box">
-                    <input type="text" id="searchInput" onkeyup="filterMold()" placeholder="🔍 Cari ID, Nama Mold, atau Produk...">
+                    <input type="text" id="searchInput" onkeyup="filterMold()" placeholder="🔍 Cari nama mold...">
                 </div>
                 <button class="btn-add" onclick="openModal()">+ Tambah Asset Mold</button>
             </div>
@@ -485,10 +473,8 @@
             <div class="card">
                 <h2 id="detailTitle">Identitas Mold</h2>
                 <table class="detail-table">
-                    <tr><th>Nama / No. Mold</th><td id="detailNama">-</td></tr>
+                    <tr><th>Nama Mold</th><td id="detailNama">-</td></tr>
                     <tr><th>Status Mold</th><td id="detailStatus" style="font-weight: bold;">-</td></tr>
-                    <tr><th>Posisi / Rak</th><td id="detailPosisi">-</td></tr>
-                    <tr><th>Produk</th><td id="detailProduk">-</td></tr>
                 </table>
             </div>
 
@@ -704,11 +690,11 @@
                         }
                     });
                     renderMoldGrid();
-                    
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const moldId = urlParams.get('id');
-                    if (moldId && moldDatabase[moldId]) {
-                        openDetail(moldId, false);
+                    const wantId = new URLSearchParams(window.location.search).get('id');
+                    if (wantId) {
+                        const key = Object.keys(moldDatabase).find(k => k.trim().toLowerCase() === wantId.trim().toLowerCase());
+                        if (key) openDetail(key, false);
+                        else { toast('Mold "' + wantId + '" tidak ditemukan di data.', 'error'); showView('view-home', false); }
                     }
                 })
                 .catch(err => {
@@ -724,22 +710,19 @@
         function closeModal() { 
             document.getElementById('modalTambah').classList.add('hidden');
             document.getElementById('inputID').value = '';
-            document.getElementById('inputNama').value = '';
-            document.getElementById('inputProduk').value = '';
-            document.getElementById('inputPosisi').value = '';
         }
 
         function simpanMold() {
             if (window._savingMold) return;
             const id = document.getElementById('inputID').value.trim();
-            if(!id) { toast("ID/No Mold tidak boleh kosong!"); return; }
+            if(!id) { toast("Nama mold tidak boleh kosong!"); return; }
 
             const newData = {
                 id: id,
                 mold: id,
-                nama: document.getElementById('inputNama').value || "-",
-                produk: document.getElementById('inputProduk').value || "-",
-                posisi: document.getElementById('inputPosisi').value || "-",
+                nama: id,
+                produk: "-",
+                posisi: "-",
                 status: document.getElementById('inputStatus').value
             };
 
@@ -1056,22 +1039,23 @@
         }
 
         function ljBuildReport(tanggal, shift) {
-            const list = ljSorted(ljGroups({ tanggal, shift }));
-            if (!list.length) return '';
-            const emoji = shift === 'Sore' ? '🌆' : shift === 'Malam' ? '🌙' : '🌅';
             const [a, b] = ljHours(shift);
-            let t = `*Laporan Output Perjam*\n*Tgl ${tanggal}*\n${emoji} *Shift ${shift}*\n\n`;
-            list.forEach((x, idx) => {
-                const d = x.meta || {};
-                t += `${idx + 1}. ${x.mesin}\n*${x.mold || '-'}*\n* CT. : ${d.ct || '-'}\n* Target : ${d.target || '-'}\n` +
-                     `* Selang Hidrolik : ${d.selangHidrolik || '-'}\n* Kondisi Baut : ${d.baut || '-'}\n* Cek LS : ${d.limitSwitch || '-'}\n* Kondisi Produk : ${d.kondisi || '-'}\n`;
-                if (d.kondisi === 'NG') t += `* Permasalahan : ${d.permasalahan || '-'}\n`;
-                t += '\n';
+            const list = ljSorted(ljGroups({ tanggal, shift })).map(x => {
+                const lines = [];
                 for (let i = a; i <= b; i++) {
                     const h = ljHH(i), r = x.rows[h];
-                    t += r && r.pcs ? `${h} : ${r.pcs} pcs${r.note ? ' (' + r.note + ')' : ''}\n` : `${h} :${r && r.note ? ' (' + r.note + ')' : ''}\n`;
+                    if (r && (r.pcs || r.note)) lines.push(r.pcs ? `${h} : ${r.pcs} pcs${r.note ? ' (' + r.note + ')' : ''}` : `${h} : (${r.note})`);
                 }
-                t += '\n';
+                return { x, lines };
+            }).filter(o => o.lines.length);
+            if (!list.length) return '';
+            const emoji = shift === 'Sore' ? '🌆' : shift === 'Malam' ? '🌙' : '🌅';
+            let t = `*Laporan Output Perjam*\n*Tgl ${tanggal}*\n${emoji} *Shift ${shift}*\n\n`;
+            list.forEach(({ x, lines }, idx) => {
+                const d = x.meta || {};
+                t += `${idx + 1}. ${x.mesin}\n*${x.mold || '-'}*\n* CT. : ${d.ct || '-'}\n* Target : ${d.target || '-'}\n`;
+                if (d.kondisi === 'NG') t += `* Permasalahan : ${d.permasalahan || '-'}\n`;
+                t += '\n' + lines.join('\n') + '\n\n';
             });
             return t;
         }
@@ -1189,8 +1173,6 @@
 
                     card.innerHTML = `
                         <h3>${esc(item.id)}</h3>
-                        <p class="nama-mold">${esc(item.nama)}</p>
-                        <p class="nama-produk">Prd: ${esc(item.produk)}</p>
                         <span class="status-badge ${statusClass}">${esc(item.status)}</span>
                     `;
                     grid.appendChild(card);
@@ -1201,19 +1183,10 @@
         }
 
         function filterMold() {
-            const input = document.getElementById('searchInput').value.toUpperCase();
-            const cards = document.getElementsByClassName('mold-card');
-            for (let i = 0; i < cards.length; i++) {
-                const idMold = cards[i].getElementsByTagName('h3')[0].innerText.toUpperCase();
-                const namaMold = cards[i].getElementsByClassName('nama-mold')[0].innerText.toUpperCase();
-                const namaProduk = cards[i].getElementsByClassName('nama-produk')[0].innerText.toUpperCase();
-                
-                if (idMold.includes(input) || namaMold.includes(input) || namaProduk.includes(input)) {
-                    cards[i].style.display = "";
-                } else {
-                    cards[i].style.display = "none";
-                }
-            }
+            const input = document.getElementById('searchInput').value.trim().toUpperCase();
+            document.querySelectorAll('.mold-card').forEach(c => {
+                c.style.display = c.innerText.toUpperCase().includes(input) ? '' : 'none';
+            });
         }
 
         // ===== Riwayat mold (disimpan di tab "Riwayat" pada spreadsheet) =====
@@ -1304,10 +1277,8 @@
             document.getElementById('view-detail').classList.remove('hidden');
 
             document.getElementById('detailTitle').innerText = `Detail ${data.id}`;
-            document.getElementById('detailNama').innerText = data.nama;
+            document.getElementById('detailNama').innerText = data.id;
             document.getElementById('detailStatus').innerText = data.status;
-            document.getElementById('detailPosisi').innerText = data.posisi;
-            document.getElementById('detailProduk').innerText = data.produk;
 
             loadRiwayat(moldId);
 
@@ -1324,7 +1295,7 @@
             document.getElementById('riwayatList').addEventListener('click', e => { const b = e.target.closest('[data-del]'); if (b) hapusRiwayat(b.dataset.del); });
 
             if (!window.history.state) {
-                safeReplace({ view: 'view-welcome' }, window.location.pathname);
+                safeReplace({ view: 'view-welcome' }, window.location.pathname + window.location.search);
             }
 
             loadDataFromSheet();
@@ -1332,6 +1303,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const viewParam = urlParams.get('view');
             
+            if (urlParams.get('id')) toast('Membuka data mold...');
             if (isValidView(viewParam)) {
                 showView(viewParam, false);
             } else {
