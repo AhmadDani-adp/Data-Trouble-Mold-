@@ -6,233 +6,169 @@
     <title>Sistem Informasi & Maintenance Mold | PT Cahaya Buana Intitama</title>
     <style>
         :root {
-            --primary-color: #0000cc;
-            --accent-color: #ff0000;
-            --bg-color: #f0f4f8;
-            --card-bg: #ffffff;
-            --text-dark: #2c3e50;
-            --border-color: #e2e8f0;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --whatsapp-color: #25d366;
+            --primary-color: #1b3fd8; --navy: #0f2a6b; --accent-color: #e11d2e; --bg-color: #f3f6fc;
+            --card-bg: #ffffff; --text-dark: #1e2a44; --muted: #6b7690; --border-color: #e6ebf5;
+            --success-color: #16a34a; --warning-color: #f59e0b; --danger-color: #dc2626; --whatsapp-color: #25d366;
+            --field: #f1f4fb; --ease: cubic-bezier(.2,.7,.2,1);
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Segoe UI Variable Display','Segoe UI',system-ui,-apple-system,Roboto,sans-serif; background: var(--bg-color);
+               color: var(--text-dark); line-height: 1.6; overflow-x: hidden; position: relative; min-height: 100vh; }
+        .bg-orb { position: fixed; border-radius: 50%; filter: blur(70px); opacity: .55; z-index: -1; pointer-events: none; animation: drift 22s ease-in-out infinite alternate; }
+        .orb-a { width: 420px; height: 420px; background: #c9d6ff; top: -120px; right: -100px; }
+        .orb-b { width: 360px; height: 360px; background: #ffd9dc; bottom: -120px; left: -100px; animation-duration: 28s; }
+        @keyframes drift { to { transform: translate(40px, 30px) scale(1.12); } }
+        @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+        @keyframes pop { from { opacity: 0; transform: scale(.94) translateY(10px); } to { opacity: 1; transform: none; } }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-dark);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        header {
-            background-color: #ffffff;
-            color: var(--primary-color);
-            padding: 15px 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            border-bottom: 4px solid var(--accent-color);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        header { background: rgba(255,255,255,.8); backdrop-filter: blur(16px) saturate(1.5); -webkit-backdrop-filter: blur(16px) saturate(1.5);
+                 padding: 10px 20px; box-shadow: 0 12px 30px -20px rgba(15,42,107,.35); position: sticky; top: 0; z-index: 100; }
+        header::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, var(--primary-color), #6f8cff 55%, var(--accent-color)); }
         .header-container { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        .logo-img { height: 90px; width: auto; object-fit: contain; flex-shrink: 0; }
-        .header-title h1 { font-size: 1.2rem; margin-bottom: 2px; color: var(--primary-color); }
-        .header-title p { font-size: 0.75rem; color: #555; font-weight: 500; }
-        
-        .menu-btn { font-size: 28px; cursor: pointer; color: var(--primary-color); background: none; border: none; padding: 5px; z-index: 1100; }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .logo-img { height: 78px; width: auto; object-fit: contain; flex-shrink: 0; }
+        .header-title h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -.01em; color: var(--navy); line-height: 1.2; }
+        .header-title p { font-size: .78rem; color: var(--muted); font-weight: 500; }
+        .menu-btn { font-size: 24px; cursor: pointer; color: var(--navy); background: rgba(15,42,107,.07); border: none; width: 46px; height: 46px; border-radius: 14px; transition: background .2s, transform .2s; }
+        .menu-btn:hover { background: rgba(15,42,107,.13); } .menu-btn:active { transform: scale(.92); }
 
-        .sidebar {
-            position: fixed; top: 0; right: -250px; width: 250px; height: 100vh;
-            background-color: #ffffff; box-shadow: -4px 0 15px rgba(0,0,0,0.1);
-            transition: right 0.3s ease; z-index: 2000; padding-top: 20px;
-            border-left: 4px solid var(--primary-color);
-        }
+        .sidebar { position: fixed; top: 0; right: -320px; width: 290px; height: 100vh; background: #fff; box-shadow: -20px 0 50px -20px rgba(15,42,107,.35);
+                   transition: right .4s var(--ease); z-index: 2000; padding: 22px 8px; border-radius: 28px 0 0 28px; }
         .sidebar.active { right: 0; }
-        .close-btn { text-align: right; padding: 0 20px; font-size: 30px; cursor: pointer; color: #888; margin-bottom: 20px; display: block; }
-        .sidebar a {
-            display: block; padding: 15px 20px; color: var(--text-dark);
-            text-decoration: none; font-weight: 600; border-bottom: 1px solid #eee; transition: background 0.2s;
-        }
-        .sidebar a:hover { background-color: #f8fafc; color: var(--primary-color); padding-left: 25px; }
-
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 1500;
-            opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
+        .close-btn { text-align: right; padding: 0 18px; font-size: 30px; cursor: pointer; color: #9aa5bd; margin-bottom: 14px; display: block; }
+        .sidebar a { display: block; padding: 14px 18px; margin: 4px 10px; color: var(--text-dark); text-decoration: none; font-weight: 600; border-radius: 14px; transition: background .2s, transform .2s, color .2s; }
+        .sidebar a:hover { background: rgba(27,63,216,.08); color: var(--primary-color); transform: translateX(4px); }
+        .overlay { position: fixed; inset: 0; background: rgba(15,24,50,.35); backdrop-filter: blur(3px); z-index: 1500; opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s; }
         .overlay.active { opacity: 1; visibility: visible; }
 
-        .container { max-width: 900px; margin: 25px auto; padding: 0 15px; }
+        .container { max-width: 900px; margin: 22px auto 60px; padding: 0 16px; }
+        .container > div:not(.hidden) { animation: rise .5s var(--ease) both; }
 
-        .welcome-box {
-            text-align: center; 
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            padding: 40px 20px; border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05); 
-            border-top: 5px solid var(--primary-color); 
-            margin-top: 10px;
-        }
-        .welcome-box h1 { color: var(--primary-color); font-size: 2.2rem; margin-bottom: 5px; }
-        .welcome-subtitle { color: #666; font-size: 1rem; margin-bottom: 25px; }
+        .welcome-box { text-align: center; padding: 30px 0 6px; }
+        .welcome-box > * { animation: rise .6s var(--ease) both; }
+        .welcome-box > :nth-child(2) { animation-delay: .06s; } .welcome-box > :nth-child(3) { animation-delay: .12s; }
+        .welcome-box > :nth-child(4) { animation-delay: .18s; } .welcome-box > :nth-child(5) { animation-delay: .24s; } .welcome-box > :nth-child(6) { animation-delay: .3s; }
+        .welcome-box h1 { color: var(--navy); font-size: clamp(2rem, 6vw, 2.9rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; margin-bottom: 8px; }
+        .welcome-subtitle { color: var(--muted); font-size: 1.02rem; margin-bottom: 26px; }
+        .info-banner { background: rgba(27,63,216,.07); color: var(--navy); padding: 14px 18px; border-radius: 18px; font-size: .92rem; max-width: 620px; margin: 0 auto 30px; text-align: left; display: flex; gap: 12px; align-items: center; }
 
-        .info-banner {
-            background-color: #e3f2fd; color: #0d47a1;
-            padding: 10px 15px; border-radius: 8px; font-size: 0.9rem;
-            max-width: 600px; margin: 0 auto 25px auto;
-            border-left: 4px solid #1976d2; text-align: left;
-            display: flex; gap: 10px; align-items: center;
-        }
+        .dashboard-stats { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 38px; }
+        .stat-card { padding: 22px 16px 18px; border-radius: 24px; width: 150px; position: relative; overflow: hidden; transition: transform .3s var(--ease); }
+        .stat-card:hover { transform: translateY(-4px); }
+        .stat-card h3 { font-size: 2.4rem; font-weight: 800; letter-spacing: -.03em; margin: 6px 0 2px; position: relative; z-index: 2; }
+        .stat-card p { font-size: .84rem; margin: 0; font-weight: 600; position: relative; z-index: 2; }
+        .stat-icon { font-size: 2.6rem; position: absolute; top: -6px; right: -4px; opacity: .16; z-index: 1; }
+        .stat-blue { background: linear-gradient(150deg, #e9eeff, #dbe4ff); color: #26379a; }
+        .stat-green { background: linear-gradient(150deg, #e6f8ec, #d3f1de); color: #14653a; }
+        .stat-red { background: linear-gradient(150deg, #ffeceb, #ffdcdc); color: #9d1c1c; }
 
-        .dashboard-stats { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 35px; }
-        .stat-card {
-            padding: 20px 15px; border-radius: 12px; width: 140px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.04); position: relative;
-            overflow: hidden; transition: transform 0.2s;
-        }
-        .stat-card:hover { transform: translateY(-5px); }
-        .stat-card h3 { font-size: 2rem; margin: 10px 0 5px 0; position: relative; z-index: 2; }
-        .stat-card p { font-size: 0.85rem; margin: 0; font-weight: bold; position: relative; z-index: 2; }
-        .stat-icon { font-size: 2rem; position: absolute; top: -5px; right: -5px; opacity: 0.2; z-index: 1; }
+        .quick-actions-title { font-size: .95rem; color: var(--muted); margin-bottom: 14px; font-weight: 600; text-align: center; }
+        .quick-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; max-width: 780px; margin: 0 auto; }
+        .btn-action-main, .btn-action-outline { padding: 18px 20px; font-size: .98rem; border-radius: 20px; cursor: pointer; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;
+                text-decoration: none; transition: transform .25s var(--ease), box-shadow .25s; flex: 1; min-width: 160px; border: none; color: #fff; }
+        .btn-action-main { background: linear-gradient(135deg, #2a4df0, #1233b5); box-shadow: 0 16px 28px -16px rgba(27,63,216,.8); }
+        .btn-violet { background: linear-gradient(135deg, #8a5cff, #5232d6); box-shadow: 0 16px 28px -16px rgba(102,60,230,.8); }
+        .btn-amber { background: linear-gradient(135deg, #ff9442, #e2560e); box-shadow: 0 16px 28px -16px rgba(226,86,14,.8); }
+        .btn-action-main:hover { transform: translateY(-3px); } .btn-action-main:active { transform: scale(.97); }
+        .btn-action-outline { background: #fff; color: var(--primary-color); }
 
-        .stat-blue { background-color: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3; }
-        .stat-green { background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
-        .stat-red { background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+        .toolbar { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
+        .search-box { background: #fff; padding: 13px 20px; border-radius: 999px; box-shadow: 0 14px 30px -20px rgba(15,42,107,.45); display: flex; gap: 10px; flex: 1; min-width: 250px; transition: box-shadow .25s; }
+        .search-box:focus-within { box-shadow: 0 0 0 4px rgba(27,63,216,.14), 0 14px 30px -20px rgba(15,42,107,.45); }
+        .search-box input { width: 100%; border: none; font-size: 1rem; outline: none; background: transparent; }
+        .btn-add { background: linear-gradient(135deg, #22c55e, #15803d); color: #fff; border: none; padding: 13px 24px; border-radius: 999px; font-weight: 700; cursor: pointer; box-shadow: 0 14px 24px -14px rgba(21,128,61,.9); transition: transform .2s; }
+        .btn-add:hover { transform: translateY(-2px); } .btn-add:active { transform: scale(.96); }
 
-        .quick-actions-title { font-size: 1rem; color: #555; margin-bottom: 15px; font-weight: 600; text-align: center; }
-        .quick-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; max-width: 750px; margin: 0 auto; }
-        .btn-action-main, .btn-action-outline {
-            padding: 12px 20px; font-size: 0.95rem; border-radius: 8px; cursor: pointer; font-weight: bold;
-            display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
-            transition: all 0.2s; flex: 1; min-width: 150px; border: none;
-        }
-        .btn-action-main { background-color: var(--primary-color); color: white; box-shadow: 0 4px 10px rgba(0,0,204,0.2); }
-        .btn-action-main:hover { background-color: #0000a0; transform: translateY(-2px); }
-        .btn-action-outline { background-color: white; color: var(--primary-color); border: 2px solid var(--primary-color); }
-        .btn-action-outline:hover { background-color: #f0f4f8; transform: translateY(-2px); }
+        .mold-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; }
+        .mold-card { background: #fff; border-radius: 22px; padding: 18px; cursor: pointer; text-align: left; box-shadow: 0 1px 2px rgba(15,42,107,.05), 0 20px 36px -26px rgba(15,42,107,.4); transition: transform .3s var(--ease), box-shadow .3s; }
+        .mold-card:hover { transform: translateY(-5px); box-shadow: 0 1px 2px rgba(15,42,107,.05), 0 28px 40px -24px rgba(27,63,216,.5); }
+        .mold-card h3 { color: var(--primary-color); font-size: 1.08rem; font-weight: 800; margin-bottom: 4px; }
+        .mold-card .nama-mold { font-size: .92rem; color: var(--text-dark); font-weight: 600; }
+        .mold-card .nama-produk { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: .74rem; font-weight: 700; margin-top: 12px; }
+        .status-ready { background: #dcfce7; color: #166534; } .status-repair { background: #fee2e2; color: #991b1b; }
+        .empty-state { text-align: center; padding: 44px; color: var(--muted); width: 100%; grid-column: 1 / -1; }
 
-        .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .search-box {
-            background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: flex; gap: 10px; border-left: 4px solid var(--primary-color); flex: 1; min-width: 250px;
-        }
-        .search-box input { width: 100%; border: none; font-size: 1rem; outline: none; }
-        
-        .btn-add {
-            background-color: var(--success-color); color: white; border: none;
-            padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .btn-add:hover { background-color: #218838; }
-
-        .mold-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-        .mold-card {
-            background: var(--card-bg); border-radius: 8px; padding: 15px; border: 1px solid var(--border-color);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.2s ease;
-            text-align: center; border-top: 3px solid var(--primary-color);
-        }
-        .mold-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: var(--primary-color); }
-        .mold-card h3 { color: var(--primary-color); font-size: 1.1rem; margin-bottom: 5px; }
-        .mold-card .nama-mold { font-size: 0.9rem; color: #444; font-weight: bold; }
-        .mold-card .nama-produk { font-size: 0.8rem; color: #888; margin-top: 3px; }
-        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin-top: 8px; }
-        .status-ready { background-color: #d4edda; color: #155724; }
-        .status-repair { background-color: #f8d7da; color: #721c24; }
-        
-        .empty-state { text-align: center; padding: 40px; color: #888; width: 100%; grid-column: 1 / -1; }
-
-        .btn-back { display: inline-block; background: #6c757d; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 0.9rem; margin-bottom: 20px; cursor: pointer; border: none; }
-        .btn-back:hover { background: #5a6268; }
-        .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; border-top: 3px solid var(--primary-color); }
-        .card h2 { font-size: 1.2rem; color: var(--primary-color); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; }
-        .detail-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .detail-table th, .detail-table td { padding: 10px 12px; border: 1px solid var(--border-color); text-align: left; vertical-align: top; }
-        .detail-table th { background-color: #f8fafc; width: 35%; color: #4a5568; font-weight: 600; }
-        
+        .btn-back { display: inline-flex; background: rgba(15,42,107,.07); color: var(--navy); padding: 9px 18px; border-radius: 999px; font-size: .9rem; font-weight: 600; margin-bottom: 18px; cursor: pointer; border: none; transition: background .2s, transform .2s; }
+        .btn-back:hover { background: rgba(15,42,107,.13); transform: translateX(-3px); }
+        .card { background: #fff; border-radius: 28px; padding: 28px 26px; margin-bottom: 22px; box-shadow: 0 1px 2px rgba(15,42,107,.04), 0 30px 50px -34px rgba(15,42,107,.45); }
+        .card h2 { font-size: 1.4rem; font-weight: 800; letter-spacing: -.02em; color: var(--navy); margin-bottom: 8px; }
+        .detail-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+        .detail-table th, .detail-table td { padding: 12px 6px; border: 0; border-bottom: 1px solid #eef1f8; text-align: left; vertical-align: top; }
+        .detail-table th { width: 36%; color: var(--muted); font-weight: 600; }
         .action-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
-        .btn-action-full { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; color: white; transition: opacity 0.2s ease; cursor: pointer; border: none; width: 100%; }
-        .btn-action-full:hover { opacity: 0.9; }
-        .btn-form { background-color: #673ab7; }
-        .btn-sheet { background-color: #0f9d58; }
-        .btn-pdf { background-color: #d9534f; }
-        .btn-wa { background-color: var(--whatsapp-color); }
-        
+        .btn-action-full { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border-radius: 16px; text-decoration: none; font-weight: 700; color: #fff; cursor: pointer; border: none; width: 100%; transition: transform .2s var(--ease), box-shadow .2s, opacity .2s; }
+        .btn-action-full:hover { transform: translateY(-2px); } .btn-action-full:active { transform: scale(.98); }
+        .btn-form { background: linear-gradient(135deg, #8a5cff, #5232d6); } .btn-sheet { background: #0f9d58; }
+        .btn-pdf { background: #e5645f; } .btn-wa { background: linear-gradient(135deg, #2fe07a, #12a64a); box-shadow: 0 16px 26px -16px rgba(18,166,74,.9); }
+        .opt-card { border-radius: 24px; padding: 24px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+        .opt-amber { background: linear-gradient(160deg, #fff4e8, #ffe7cf); } .opt-green { background: linear-gradient(160deg, #eafaf0, #d6f3e1); }
+
         .hidden { display: none !important; }
         .print-only { display: none; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: .86rem; color: var(--muted); }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 13px 16px; border: 2px solid transparent; background: var(--field); border-radius: 16px; font-family: inherit; font-size: 1rem; color: var(--text-dark); transition: background .2s, border-color .2s, box-shadow .2s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus, .hourly-item input:focus { outline: none; background: #fff; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(27,63,216,.12); }
 
-        .hourly-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 10px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-        }
-        .hourly-item {
-            background: #f8fafc;
-            border: 1px solid var(--border-color);
-            padding: 8px;
-            border-radius: 6px;
-            text-align: center;
-        }
-        .hourly-item label {
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            display: block;
-            margin-bottom: 4px;
-        }
-        .hourly-item input {
-            width: 100%;
-            padding: 6px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
+        .hourly-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 12px; margin: 6px 0 18px; }
+        .hourly-item { background: var(--field); padding: 12px; border-radius: 20px; text-align: center; transition: transform .25s var(--ease); }
+        .hourly-item:focus-within { transform: translateY(-2px); background: #e9eeff; }
+        .hourly-item label { font-size: .82rem; font-weight: 800; color: var(--primary-color); display: block; margin-bottom: 6px; }
+        .hourly-item input { width: 100%; padding: 9px; border: 2px solid transparent; background: #fff; border-radius: 12px; text-align: center; font-size: .95rem; transition: border-color .2s, box-shadow .2s; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2500; display: flex; align-items: center; justify-content: center; }
-        .modal-box { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 12px; }
-        .modal-box h2 { color: var(--primary-color); margin-bottom: 15px; font-size: 1.3rem; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #444; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 1rem; }
-        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-cancel { background: #ccc; padding: 10px; border: none; border-radius: 6px; flex: 1; cursor: pointer; font-weight: bold; }
-        .btn-save { background: var(--primary-color); color: white; padding: 10px; border: none; border-radius: 6px; flex: 1; cursor: pointer; font-weight: bold; }
+        .lj-box { margin-bottom: 18px; background: linear-gradient(180deg, #f4f7ff, #ecf1fe); border-radius: 22px; padding: 16px; }
+        .lj-title { font-weight: 800; color: var(--navy); margin-bottom: 8px; }
+        .lj-hint { color: var(--muted); font-size: .8rem; margin-bottom: 10px; }
+        .lj-row { display: flex; gap: 8px; margin-bottom: 8px; animation: rise .35s var(--ease) both; }
+        .lj-item { flex: 1; text-align: left; padding: 11px 14px; border-radius: 16px; border: 2px solid transparent; background: #fff; cursor: pointer; display: flex; flex-direction: column; gap: 1px; font-size: .9rem; transition: transform .2s, border-color .2s; }
+        .lj-item span { color: var(--text-dark); } .lj-item small { color: var(--muted); font-size: .76rem; }
+        .lj-item:hover { transform: translateX(3px); } .lj-item.on { border-color: var(--primary-color); background: #f5f8ff; }
+        .lj-del { width: 48px; border-radius: 16px; border: none; background: #fee2e2; cursor: pointer; font-size: 1rem; transition: transform .2s, background .2s; }
+        .lj-del:hover { background: #fecaca; } .lj-del:active { transform: scale(.92); }
+        .lj-clean { width: 100%; margin-top: 2px; padding: 10px; border-radius: 14px; border: none; background: #fff; color: #b91c1c; cursor: pointer; font-size: .84rem; font-weight: 600; }
 
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15,24,50,.45); backdrop-filter: blur(4px); z-index: 2500; display: flex; align-items: center; justify-content: center; }
+        .modal-box { background: #fff; width: 92%; max-width: 420px; padding: 28px; border-radius: 28px; max-height: 92vh; overflow-y: auto; animation: pop .35s var(--ease) both; }
+        .modal-box h2 { color: var(--navy); margin-bottom: 16px; font-size: 1.35rem; font-weight: 800; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 22px; }
+        .btn-cancel { background: var(--field); color: var(--text-dark); padding: 13px; border: none; border-radius: 14px; flex: 1; cursor: pointer; font-weight: 700; }
+        .btn-save { background: linear-gradient(135deg, #2a4df0, #1233b5); color: #fff; padding: 13px; border: none; border-radius: 14px; flex: 1; cursor: pointer; font-weight: 700; }
+
+        .toast-wrap { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); z-index: 99999; display: flex; flex-direction: column; gap: 8px; width: min(92vw, 420px); pointer-events: none; }
+        .toast { pointer-events: auto; padding: 13px 18px; border-radius: 16px; color: #fff; font-size: .9rem; font-weight: 600; box-shadow: 0 18px 34px -14px rgba(15,24,50,.5); background: #25314f; cursor: pointer; opacity: 0; transform: translateY(-10px) scale(.97); transition: opacity .3s, transform .3s var(--ease); }
+        .toast.show { opacity: 1; transform: none; } .toast-success { background: #15803d; } .toast-error { background: #b91c1c; }
+
+        .form-group textarea { min-height: 84px; resize: vertical; }
+        .rw-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+        .rw-sum { color: var(--muted); font-size: .88rem; }
+        .tl { position: relative; margin-top: 20px; padding-left: 28px; }
+        .tl::before { content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: linear-gradient(var(--primary-color), rgba(27,63,216,.08)); }
+        .tl-item { position: relative; padding-bottom: 24px; animation: rise .45s var(--ease) both; }
+        .tl-dot { position: absolute; left: -28px; top: 5px; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 4px solid var(--primary-color); }
+        .tl-date { font-weight: 800; color: var(--navy); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .tl-title { font-weight: 700; margin-top: 2px; }
+        .tl-body { color: var(--muted); font-size: .9rem; margin-top: 4px; line-height: 1.7; } .tl-body b { color: var(--text-dark); font-weight: 600; }
+        .chip { font-size: .72rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; }
+        .chip.ok { background: #dcfce7; color: #166534; } .chip.ng { background: #fee2e2; color: #991b1b; } .chip.wait { background: #fef3c7; color: #92400e; }
+        .tl-del { margin-top: 4px; background: none; border: none; color: #b91c1c; font-size: .8rem; cursor: pointer; padding: 2px 0; }
+        .tl-empty { color: var(--muted); padding: 22px 0 6px; }
         @media print {
-            body { background: white; }
-            header, .sidebar, .overlay, .quick-actions, .toolbar, .btn-back, .action-buttons, button, .form-group, .card > h2, .card > p, .hourly-grid { display: none !important; }
-            .card { box-shadow: none; border: none; padding: 0; margin: 0; }
-            .container { max-width: 100%; margin: 0; padding: 0; }
+            body { background: #fff; } .bg-orb { display: none; }
+            header, .sidebar, .overlay, .quick-actions, .toolbar, .btn-back, .action-buttons, button, .form-group, .card > h2, .card > p, .hourly-grid, .toast-wrap, #ljBox, #syncStatus { display: none !important; }
+            .card { box-shadow: none; padding: 0; margin: 0; } .container { max-width: 100%; margin: 0; padding: 0; }
             .print-only { display: block !important; font-family: monospace; font-size: 14px; line-height: 1.5; color: #000; }
         }
-
         @media (max-width: 600px) {
-            .header-title h1 { font-size: 1rem; }
-            .header-title p { display: none; }
-            .logo-img { height: 64px; }
-            .quick-actions { flex-direction: column; }
-            .toolbar { flex-direction: column; }
+            .header-title h1 { font-size: 1rem; } .header-title p { display: none; } .logo-img { height: 58px; }
+            .quick-actions { flex-direction: column; } .toolbar { flex-direction: column; } .card { padding: 22px 18px; border-radius: 24px; }
         }
-
-        /* Toast notifikasi */
-        .toast-wrap { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 99999;
-                      display: flex; flex-direction: column; gap: 8px; width: min(92vw, 420px); pointer-events: none; }
-        .toast { pointer-events: auto; padding: 12px 16px; border-radius: 8px; color: #fff; font-size: 0.9rem;
-                 font-weight: 600; box-shadow: 0 6px 18px rgba(0,0,0,0.25); background: #2c3e50; cursor: pointer;
-                 opacity: 0; transform: translateY(-8px); transition: opacity .25s, transform .25s; }
-        .toast.show { opacity: 1; transform: translateY(0); }
-        .toast-success { background: var(--success-color); }
-        .toast-error { background: var(--danger-color); }
-        @media print { .toast-wrap, #ljBox, #syncStatus { display: none !important; } }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; } html { scroll-behavior: auto; } }
     </style>
 </head>
 <body>
+    <div class="bg-orb orb-a"></div><div class="bg-orb orb-b"></div>
 
     <header>
         <div class="header-container">
@@ -290,6 +226,32 @@
         </div>
     </div>
 
+    <div id="modalRiwayat" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2>Tambah Riwayat Mold</h2>
+            <div class="form-group"><label>Tanggal kejadian</label><input type="date" id="rwTanggal"></div>
+            <div class="form-group"><label>Mesin</label><input type="text" id="rwMesin" list="dlMesin" placeholder="Pilih / ketik nama mesin"></div>
+            <div class="form-group"><label>Jenis trouble</label><input type="text" id="rwJenis" list="dlJenis" placeholder="Contoh: Flash, short shot, ejector macet"></div>
+            <div class="form-group"><label>Bagian mold</label><input type="text" id="rwBagian" list="dlBagian" placeholder="Contoh: Core, cavity, ejector pin"></div>
+            <div class="form-group"><label>Penyebab</label><input type="text" id="rwPenyebab" placeholder="Apa yang menyebabkan trouble"></div>
+            <div class="form-group"><label>Tindakan perbaikan</label><textarea id="rwTindakan" placeholder="Apa yang dikerjakan"></textarea></div>
+            <div class="form-group"><label>Durasi perbaikan</label><input type="text" id="rwDurasi" placeholder="Contoh: 2 jam"></div>
+            <div class="form-group"><label>Hasil trial</label>
+                <select id="rwHasil"><option value="OK">OK</option><option value="NG">NG</option><option value="Belum trial">Belum trial</option></select></div>
+            <div class="form-group"><label>Status mold setelah ini</label>
+                <select id="rwStatus"><option value="Siap Produksi">Siap Produksi</option><option value="Sedang di-Repair">Sedang di-Repair</option></select></div>
+            <div class="form-group"><label>PIC / teknisi</label><input type="text" id="rwPic" placeholder="Nama teknisi"></div>
+            <div class="form-group"><label>Catatan tambahan</label><input type="text" id="rwCatatan" placeholder="Opsional"></div>
+            <datalist id="dlMesin"></datalist>
+            <datalist id="dlJenis"><option value="Flash / burry"><option value="Short shot"><option value="Sink mark"><option value="Ejector macet"><option value="Bocor air / oli"><option value="Keausan"><option value="Retak / patah"></datalist>
+            <datalist id="dlBagian"><option value="Core"><option value="Cavity"><option value="Ejector pin"><option value="Slider"><option value="Cooling / water line"><option value="Hot runner"><option value="Baut / klem"></datalist>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeRiwayatModal()">Batal</button>
+                <button class="btn-save" onclick="simpanRiwayat()">Simpan riwayat</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         
         <div id="view-welcome">
@@ -325,10 +287,10 @@
                     <button class="btn-action-main" onclick="showView('view-home')">
                         🔍 Cari / Daftar Mold
                     </button>
-                    <button class="btn-action-main" style="background-color: #673ab7;" onclick="showView('view-control')">
+                    <button class="btn-action-main btn-violet" onclick="showView('view-control')">
                         ⚙️ Laporan Output Per Jam
                     </button>
-                    <button class="btn-action-main" style="background-color: #e65100;" onclick="showView('view-perbaikan')">
+                    <button class="btn-action-main btn-amber" onclick="showView('view-perbaikan')">
                         🛠️ Perbaikan Mold
                     </button>
                 </div>
@@ -358,7 +320,7 @@
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 25px;">
                     <!-- Option 1 -->
-                    <div style="background: #fff8f0; border: 2px solid #ff9800; border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div class="opt-card opt-amber">
                         <div>
                             <div style="font-size: 2.5rem; margin-bottom: 10px;">📝</div>
                             <h3 style="color: #e65100; margin-bottom: 8px;">Tambahkan atau Input Perbaikan</h3>
@@ -370,7 +332,7 @@
                     </div>
 
                     <!-- Option 2 -->
-                    <div style="background: #f0fdf4; border: 2px solid #22c55e; border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div class="opt-card opt-green">
                         <div>
                             <div style="font-size: 2.5rem; margin-bottom: 10px;">📊</div>
                             <h3 style="color: #15803d; margin-bottom: 8px;">Lihat Progres</h3>
@@ -448,11 +410,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Nama Produk</label>
-                    <input type="text" id="ctrlProduk" placeholder="Nama produk...">
-                </div>
-
-                <div class="form-group">
                     <label>Kondisi Produk</label>
                     <select id="ctrlKondisi" onchange="togglePermasalahan()">
                         <option value="OK">OK</option>
@@ -510,8 +467,8 @@
                 <div id="printReportContainer" class="print-only"></div>
 
                 <div style="margin-top: 25px;">
-                    <div id="ljBox" style="margin-bottom:14px; background:#f8fafc; border:1px dashed var(--primary-color); border-radius:8px; padding:12px;">
-                        <div style="font-weight:bold; color:var(--primary-color); margin-bottom:8px;">📋 Mesin / Mold dalam laporan shift ini: <span id="ljCount">0</span></div>
+                    <div id="ljBox" class="lj-box">
+                        <div class="lj-title">📋 Mesin / Mold dalam laporan shift ini: <span id="ljCount">0</span></div>
                         <div id="ljList"></div>
                     </div>
                     <p id="syncStatus" style="text-align:center; font-size:0.85rem; margin-bottom:10px; color:#666;"></p>
@@ -536,41 +493,20 @@
             </div>
 
             <div class="card">
-                <h2>Riwayat Trouble & Repair Terakhir</h2>
-                <table class="detail-table">
-                    <tr><th>Tanggal</th><td id="dtTanggal">-</td></tr>
-                    <tr><th>Jam</th><td id="dtJam">-</td></tr>
-                    <tr><th>Mesin</th><td id="dtMesin">-</td></tr>
-                    <tr><th>Jenis Trouble</th><td id="dtJenis">-</td></tr>
-                    <tr><th>Lokasi Trouble</th><td id="dtLokasi">-</td></tr>
-                    <tr><th>Bagian Mold</th><td id="dtBagian">-</td></tr>
-                    <tr><th>Penyebab</th><td id="dtPenyebab">-</td></tr>
-                    <tr><th>Detail Penyebab</th><td id="dtDetailPenyebab">-</td></tr>
-                    <tr><th>Tindakan Repair</th><td id="dtTindakan">-</td></tr>
-                    <tr><th>Finishing</th><td id="dtFinishing">-</td></tr>
-                    <tr><th>Durasi Repair</th><td id="dtDurasi">-</td></tr>
-                    <tr><th>Hasil Trial</th><td id="dtHasil" style="font-weight:bold; color:var(--success-color);">-</td></tr>
-                    <tr><th>Trouble Berulang?</th><td id="dtBerulang">-</td></tr>
-                    <tr><th>Jumlah Kejadian</th><td id="dtJumlah">-</td></tr>
-                    <tr><th>Shot/Cycle</th><td id="dtShot">-</td></tr>
-                    <tr><th>PIC/Technician</th><td id="dtPic">-</td></tr>
-                    <tr><th>Catatan/Follow Up</th><td id="dtCatatan">-</td></tr>
-                </table>
-            </div>
-
-            <div class="card">
-                <h2>Aksi Lapangan & Input Data</h2>
-                <div class="action-buttons">
-                    <a id="btnGoogleForm" href="https://forms.google.com" target="_blank" class="btn-action-full btn-form">
-                        📝 Input Trouble/Repair (Google Form)
-                    </a>
+                <div class="rw-head">
+                    <div>
+                        <h2>Riwayat Trouble & Perbaikan</h2>
+                        <p id="riwayatSummary" class="rw-sum"></p>
+                    </div>
+                    <button class="btn-add" onclick="openRiwayatModal()">+ Tambah Riwayat</button>
                 </div>
+                <div id="riwayatList" class="tl"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDDdMBDexjpAUgsQOcHRRwQdEmWEmSFTJl91I8ykjaXs_f0BJMU5xYiGHJ2EN8Ns7G/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwO5z2x1EhJt_Tz7MgCWLEzryRVInd3E2iP1CoyVCPKeHM3knFWW0dDQeHk0Oms3s9c/exec";
 
         let moldDatabase = {};
         let moldLoadState = 'loading';
@@ -840,8 +776,8 @@
         // ===== Laporan Output Per Jam =====
         // Data diikat ke tanggal + shift + mesin + "grup" (id internal), BUKAN ke nama mold yang diketik.
         // Jadi nama mold boleh diubah/diperbaiki, dan data tetap muncul lagi setelah refresh.
-        const LAPORAN_URL = "https://script.google.com/macros/s/AKfycbzDDdMBDexjpAUgsQOcHRRwQdEmWEmSFTJl91I8ykjaXs_f0BJMU5xYiGHJ2EN8Ns7G/exec";
-        const LJ_FIELDS = { ct: 'ctrlCT', target: 'ctrlTarget', mold: 'ctrlMold', produk: 'ctrlProduk', kondisi: 'ctrlKondisi',
+        const LAPORAN_URL = "https://script.google.com/macros/s/AKfycbwO5z2x1EhJt_Tz7MgCWLEzryRVInd3E2iP1CoyVCPKeHM3knFWW0dDQeHk0Oms3s9c/exec";
+        const LJ_FIELDS = { ct: 'ctrlCT', target: 'ctrlTarget', mold: 'ctrlMold', kondisi: 'ctrlKondisi',
             permasalahan: 'ctrlPermasalahan', selangHidrolik: 'ctrlSelangHidrolik', baut: 'ctrlBaut', hidrolik: 'ctrlHidrolik', limitSwitch: 'ctrlLimitSwitch' };
         let ljRows = {}, ljPending = {}, ljEditAt = {}, ljSaveTimer = null, ljLastScope = null;
         let ljGrp = null, ljFreshGrp = null, ljDirty = false;
@@ -1067,19 +1003,15 @@
             if (!box) return;
             const sc = ljScope(), list = ljSorted(ljGroups(sc));
             ljEl('ljCount').textContent = list.length;
-            if (!list.length) { box.innerHTML = '<p style="color:#888; font-size:0.85rem;">Belum ada data pada shift ini.</p>'; return; }
+            if (!list.length) { box.innerHTML = '<p class="lj-hint">Belum ada data pada shift ini.</p>'; return; }
             const kosong = list.filter(x => !x.any && !(x.mesin === sc.mesin && x.grp === ljGrp)).length;
-            box.innerHTML = '<p style="color:#666; font-size:0.78rem; margin-bottom:8px;">Ketuk entri untuk membuka &amp; mengedit. Ketuk 🗑️ untuk menghapus.</p>' +
+            box.innerHTML = '<p class="lj-hint">Ketuk entri untuk mengedit. Ketuk 🗑️ untuk menghapus.</p>' +
                 list.map(x => {
                     const on = x.mesin === sc.mesin && x.grp === ljGrp;
-                    return `<div style="display:flex; gap:6px; margin-bottom:6px;">` +
-                        `<button type="button" data-m="${esc(x.mesin)}" data-g="${esc(x.grp)}" style="flex:1; text-align:left; padding:8px 10px; border-radius:6px; ` +
-                        `border:1px solid ${on ? 'var(--primary-color)' : '#cbd5e1'}; background:${on ? '#e8ecff' : '#fff'}; cursor:pointer; font-size:0.85rem;">` +
-                        `✏️ <strong>${esc(x.mesin)}</strong> - ${esc(x.mold) || '(mold belum diisi)'} <small style="color:#666;">• ${x.jam} jam terisi${on ? ' • sedang diedit' : ''}</small></button>` +
-                        `<button type="button" data-dm="${esc(x.mesin)}" data-dg="${esc(x.grp)}" aria-label="Hapus" style="width:46px; border-radius:6px; border:1px solid #fecaca; background:#fee2e2; color:#b91c1c; cursor:pointer; font-size:1rem;">🗑️</button>` +
-                        `</div>`;
+                    return `<div class="lj-row"><button type="button" class="lj-item${on ? ' on' : ''}" data-m="${esc(x.mesin)}" data-g="${esc(x.grp)}"><strong>${esc(x.mesin)}</strong><span>${esc(x.mold) || '(mold belum diisi)'}</span><small>${x.jam} jam terisi${on ? ' • sedang diedit' : ''}</small></button>` +
+                           `<button type="button" class="lj-del" data-dm="${esc(x.mesin)}" data-dg="${esc(x.grp)}" aria-label="Hapus">🗑️</button></div>`;
                 }).join('') +
-                (kosong ? `<button type="button" data-clean="1" style="width:100%; margin-top:4px; padding:8px; border-radius:6px; border:1px solid #fecaca; background:#fff; color:#b91c1c; cursor:pointer; font-size:0.82rem;">🧹 Hapus ${kosong} entri kosong (belum ada data jam)</button>` : '');
+                (kosong ? `<button type="button" class="lj-clean" data-clean="1">🧹 Hapus ${kosong} entri kosong (belum ada data jam)</button>` : '');
         }
 
         // Hapus satu entri (mesin + mold) beserta semua jamnya; ikut terhapus di spreadsheet
@@ -1222,6 +1154,14 @@
             }
         });
 
+        function countUp(id, to) {
+            const el = document.getElementById(id), from = parseInt(el.innerText) || 0;
+            if (from === to || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { el.innerText = to; return; }
+            const t0 = performance.now();
+            const step = t => { const k = Math.min((t - t0) / 700, 1); el.innerText = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+            requestAnimationFrame(step);
+        }
+
         function renderMoldGrid() {
             const grid = document.getElementById('moldGrid');
             grid.innerHTML = '';
@@ -1257,9 +1197,7 @@
                 });
             }
 
-            document.getElementById('statTotal').innerText = total;
-            document.getElementById('statSiap').innerText = siap;
-            document.getElementById('statRepair').innerText = repair;
+            countUp('statTotal', total); countUp('statSiap', siap); countUp('statRepair', repair);
         }
 
         function filterMold() {
@@ -1278,6 +1216,86 @@
             }
         }
 
+        // ===== Riwayat mold (disimpan di tab "Riwayat" pada spreadsheet) =====
+        const BLN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        let riwayatList = [], riwayatMoldId = null;
+        const rwKey = id => 'riwayat_' + id;
+        function tglID(t) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(t || ''); return m ? `${+m[3]} ${BLN[+m[2] - 1]} ${m[1]}` : (t || '-'); }
+        function rwSort() { riwayatList.sort((a, b) => String(b.tanggal).localeCompare(String(a.tanggal)) || Number(b.createdAt) - Number(a.createdAt)); }
+        function rwSave() { safeSet(rwKey(riwayatMoldId), JSON.stringify(riwayatList)); }
+
+        function renderRiwayat(note) {
+            const box = document.getElementById('riwayatList'), sum = document.getElementById('riwayatSummary');
+            if (!box) return;
+            const list = riwayatList;
+            sum.textContent = list.length ? `Maintenance terakhir ${tglID(list[0].tanggal)} • ${list.length} catatan` : 'Belum ada riwayat tercatat.';
+            if (!list.length) { box.innerHTML = `<p class="tl-empty">${esc(note || 'Belum ada riwayat. Ketuk "+ Tambah Riwayat" untuk mencatat trouble atau perbaikan pertama.')}</p>`; return; }
+            box.innerHTML = list.map(r => {
+                const chip = r.hasilTrial ? `<span class="chip ${r.hasilTrial === 'OK' ? 'ok' : r.hasilTrial === 'NG' ? 'ng' : 'wait'}">Trial ${esc(r.hasilTrial)}</span>` : '';
+                const wait = r._pending ? '<span class="chip wait">Mengirim...</span>' : '';
+                const line = (k, v) => v ? `<b>${k}:</b> ${esc(v)}<br>` : '';
+                return `<div class="tl-item"><span class="tl-dot"></span>` +
+                    `<div class="tl-date">${esc(tglID(r.tanggal))} ${chip}${wait}</div>` +
+                    `<div class="tl-title">${esc(r.jenisTrouble || 'Perbaikan')}${r.bagianMold ? ' - ' + esc(r.bagianMold) : ''}</div>` +
+                    `<div class="tl-body">${line('Penyebab', r.penyebab)}${line('Tindakan', r.tindakanRepair)}${line('Durasi', r.durasiRepair)}${line('Mesin', r.mesin)}${line('PIC', r.picTechnician)}${line('Catatan', r.catatan)}</div>` +
+                    `<button type="button" class="tl-del" data-del="${esc(r.idRiwayat)}">Hapus</button></div>`;
+            }).join('') + (note ? `<p class="tl-empty">${esc(note)}</p>` : '');
+        }
+
+        function loadRiwayat(id) {
+            riwayatMoldId = id;
+            try { riwayatList = JSON.parse(safeGet(rwKey(id)) || '[]') || []; } catch (e) { riwayatList = []; }
+            renderRiwayat(riwayatList.length ? '' : 'Memuat riwayat...');
+            fetch(`${SCRIPT_URL}?action=riwayat&id=${encodeURIComponent(id)}&_=${Date.now()}`).then(r => r.json()).then(d => {
+                if (!d || d.ok !== true || !Array.isArray(d.rows)) throw new Error('format');
+                if (riwayatMoldId !== id) return;
+                const ids = new Set(d.rows.map(r => r.idRiwayat));
+                const pend = riwayatList.filter(r => r._pending && !ids.has(r.idRiwayat) && Date.now() - r._t < 180000);
+                riwayatList = d.rows.concat(pend); rwSort(); rwSave(); renderRiwayat();
+            }).catch(() => { if (riwayatMoldId === id) renderRiwayat(riwayatList.length ? 'Tidak bisa terhubung ke spreadsheet. Menampilkan data tersimpan di HP ini.' : 'Tidak bisa memuat riwayat. Periksa koneksi, lalu buka ulang halaman ini.'); });
+        }
+
+        function openRiwayatModal() {
+            const dl = document.getElementById('dlMesin');
+            if (!dl.children.length) Object.keys(laneMachines).forEach(l => laneMachines[l].forEach(m => { const o = document.createElement('option'); o.value = m; dl.appendChild(o); }));
+            document.getElementById('rwTanggal').value = todayLocal();
+            const cur = moldDatabase[riwayatMoldId];
+            document.getElementById('rwStatus').value = cur && cur.status === 'Sedang di-Repair' ? 'Sedang di-Repair' : 'Siap Produksi';
+            document.getElementById('modalRiwayat').classList.remove('hidden');
+        }
+        function closeRiwayatModal() {
+            document.getElementById('modalRiwayat').classList.add('hidden');
+            ['rwMesin', 'rwJenis', 'rwBagian', 'rwPenyebab', 'rwTindakan', 'rwDurasi', 'rwPic', 'rwCatatan'].forEach(i => { document.getElementById(i).value = ''; });
+            document.getElementById('rwHasil').selectedIndex = 0;
+        }
+
+        function simpanRiwayat() {
+            const v = id => document.getElementById(id).value.trim();
+            if (!riwayatMoldId) return;
+            if (!v('rwTanggal')) { toast('Tanggal wajib diisi!'); return; }
+            if (!v('rwJenis') && !v('rwTindakan')) { toast('Isi jenis trouble atau tindakan perbaikan!'); return; }
+            const row = { idRiwayat: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), idMold: riwayatMoldId, createdAt: String(Date.now()),
+                tanggal: v('rwTanggal'), mesin: v('rwMesin'), jenisTrouble: v('rwJenis'), bagianMold: v('rwBagian'), penyebab: v('rwPenyebab'),
+                tindakanRepair: v('rwTindakan'), durasiRepair: v('rwDurasi'), hasilTrial: v('rwHasil'), picTechnician: v('rwPic'), catatan: v('rwCatatan') };
+            const status = v('rwStatus');
+            riwayatList.unshift(Object.assign({ _pending: true, _t: Date.now() }, row)); rwSort(); rwSave(); renderRiwayat();
+            const m = moldDatabase[riwayatMoldId];
+            if (m && status) { m.status = status; document.getElementById('detailStatus').innerText = status; renderMoldGrid(); }
+            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(Object.assign({ action: 'riwayat', op: 'tambah', statusMold: status }, row)) })
+                .then(() => { toast('Riwayat berhasil disimpan!'); const id = riwayatMoldId; setTimeout(() => { if (riwayatMoldId === id) loadRiwayat(id); }, 2500); })
+                .catch(() => toast('Gagal mengirim riwayat. Periksa koneksi lalu coba lagi.'));
+            closeRiwayatModal();
+        }
+
+        function hapusRiwayat(idRiwayat) {
+            const r = riwayatList.find(x => x.idRiwayat === idRiwayat);
+            if (!r || !confirm(`Hapus riwayat ${tglID(r.tanggal)} - ${r.jenisTrouble || 'Perbaikan'}?\nData ikut terhapus di spreadsheet dan tidak bisa dikembalikan.`)) return;
+            riwayatList = riwayatList.filter(x => x.idRiwayat !== idRiwayat); rwSave(); renderRiwayat();
+            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'riwayat', op: 'hapus', idRiwayat }) })
+                .then(() => { toast('Riwayat dihapus.', 'success'); const id = riwayatMoldId; setTimeout(() => { if (riwayatMoldId === id) loadRiwayat(id); }, 2500); })
+                .catch(() => toast('Gagal menghapus. Periksa koneksi lalu coba lagi.'));
+        }
+
         function openDetail(moldId, pushHistory = true) {
             const data = moldDatabase[moldId];
             if (!data) return;
@@ -1291,26 +1309,7 @@
             document.getElementById('detailPosisi').innerText = data.posisi;
             document.getElementById('detailProduk').innerText = data.produk;
 
-            const r = data.riwayatTerakhir;
-            document.getElementById('dtTanggal').innerText = r.tanggal;
-            document.getElementById('dtJam').innerText = r.jam;
-            document.getElementById('dtMesin').innerText = r.mesin;
-            document.getElementById('dtJenis').innerText = r.jenis;
-            document.getElementById('dtLokasi').innerText = r.lokasi;
-            document.getElementById('dtBagian').innerText = r.bagian;
-            document.getElementById('dtPenyebab').innerText = r.penyebab;
-            document.getElementById('dtDetailPenyebab').innerText = r.detailPenyebab;
-            document.getElementById('dtTindakan').innerText = r.tindakan;
-            document.getElementById('dtFinishing').innerText = r.finishing;
-            document.getElementById('dtDurasi').innerText = r.durasi;
-            document.getElementById('dtHasil').innerText = r.hasil;
-            document.getElementById('dtBerulang').innerText = r.berulang;
-            document.getElementById('dtJumlah').innerText = r.jumlah;
-            document.getElementById('dtShot').innerText = r.shot;
-            document.getElementById('dtPic').innerText = r.pic;
-            document.getElementById('dtCatatan').innerText = r.catatan;
-
-            document.getElementById('btnGoogleForm').href = `https://forms.google.com`; 
+            loadRiwayat(moldId);
 
             if (pushHistory) {
                 safePush({ view: 'view-detail', id: moldId }, `?id=${encodeURIComponent(moldId)}`);
@@ -1322,6 +1321,7 @@
             updateShiftHours();
 
             ljInit();
+            document.getElementById('riwayatList').addEventListener('click', e => { const b = e.target.closest('[data-del]'); if (b) hapusRiwayat(b.dataset.del); });
 
             if (!window.history.state) {
                 safeReplace({ view: 'view-welcome' }, window.location.pathname);
